@@ -3,6 +3,9 @@ package main
 import (
 	"crypto/ed25519"
 	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -193,6 +196,25 @@ func TestRegistryFlow(t *testing.T) {
 	}
 	if !sameJSON(p.Capabilities, json.RawMessage(capsV1)) {
 		t.Error("catalog capabilities differ from the manifest")
+	}
+	if p.Logo != "" {
+		t.Errorf("logo without one in the package: %q", p.Logo)
+	}
+	// A logo listed in the signed manifest is embedded; one that does not match it fails the build.
+	svg := []byte(`<svg xmlns="http://www.w3.org/2000/svg"/>`)
+	sumSVG := sha256.Sum256(svg)
+	withFiles := strings.Replace(man, `"entry":"index.js",`, `"entry":"index.js","files":{"index.js":"`+strings.Repeat("0", 64)+`","logo.svg":"`+hex.EncodeToString(sumSVG[:])+`"},`, 1)
+	os.WriteFile(filepath.Join(signed, "demo", "manifest.json"), []byte(withFiles), 0o644)
+	os.WriteFile(filepath.Join(signed, "demo", "logo.svg"), svg, 0o644)
+	if c, err = buildCatalog(root, signed, time.Unix(0, 0)); err != nil {
+		t.Fatal(err)
+	}
+	if want := "data:image/svg+xml;base64," + base64.StdEncoding.EncodeToString(svg); c.Plugins[0].Logo != want {
+		t.Errorf("logo: %q", c.Plugins[0].Logo)
+	}
+	os.WriteFile(filepath.Join(signed, "demo", "logo.svg"), []byte("<svg/>"), 0o644)
+	if _, err := buildCatalog(root, signed, time.Unix(0, 0)); err == nil {
+		t.Error("a logo that differs from the signed manifest was accepted")
 	}
 	// Bad registry entries are reported.
 	os.WriteFile(filepath.Join(root, "registry.json"), []byte(`{"categories":[],"plugins":[{"id":"Bad","repo":"x","trust":"maybe","category":"none"}]}`), 0o644)
