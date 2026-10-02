@@ -1,11 +1,11 @@
 {
   "id": "docker",
   "repo": "Ervisio/plugin-docker",
-  "version": "2.1.1",
-  "tag": "v2.1.1",
-  "asset": "docker-2.1.1.tar.gz",
-  "upstreamSha256": "a4db586cc07efcd26c64c7d7206b1b1a81945987731351939ba84db524558ff1",
-  "notes": "The plugin has a logo: the Docker logo is shown instead of the generic icon in the rail, Plugins and Browse (consoles newer than 0.4.0; older ones keep the icon).",
+  "version": "2.2.0",
+  "tag": "v2.2.0",
+  "asset": "docker-2.2.0.tar.gz",
+  "upstreamSha256": "c67feb9f22005b188cbcb38a90fa7742c5f46902c9a3128fd8ba614980b61056",
+  "notes": "2026-10-02. Needs Ervisio 0.5 or later (`minCore` is 0.5.0). New Attach tab: connect to the main process of a container in the same terminal as Shell. Ctrl+P then Ctrl+Q detaches and leaves it running. New Files tab: browse any folder of a container (also a stopped one, and images without `ls`), read text files, create folders and delete files. Upload a file of any size with progress, download a file under its own name, and download a folder as a `.tar`. \"Save as image\" (`docker commit`) with...",
   "manifest": {
     "name": "Docker",
     "author": "Ervisio team",
@@ -31,7 +31,7 @@
           "argv": [
             "docker",
             "-H",
-            "unix:///var/run/docker.sock",
+            "{env}",
             "exec",
             "-it",
             "-e",
@@ -41,7 +41,31 @@
           ],
           "description": "Open a shell inside a container",
           "name": "shell",
-          "pty": true
+          "pty": true,
+          "remote": "docker"
+        },
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "args": [
+            {
+              "maxLen": 128,
+              "pattern": "[a-zA-Z0-9][a-zA-Z0-9_.-]*"
+            }
+          ],
+          "argv": [
+            "docker",
+            "-H",
+            "{env}",
+            "attach",
+            "--sig-proxy=false",
+            "--detach-keys=ctrl-p,ctrl-q",
+            "{0}"
+          ],
+          "description": "Attach to the main process of a container (detach with Ctrl+P Ctrl+Q)",
+          "name": "attach",
+          "pty": true,
+          "remote": "docker"
         },
         {
           "admin": true,
@@ -50,26 +74,31 @@
             {
               "maxLen": 63,
               "pattern": "[a-z0-9][a-z0-9_-]{0,62}"
+            },
+            {
+              "maxLen": 32,
+              "pattern": "(\\.envs/env-[0-9a-f]{8}/)?"
             }
           ],
           "argv": [
             "docker",
             "-H",
-            "unix:///var/run/docker.sock",
+            "{env}",
             "compose",
             "--project-name",
             "{0}",
             "--project-directory",
-            "/opt/stacks/{0}",
+            "/opt/stacks/{1}{0}",
             "-f",
-            "/opt/stacks/{0}/compose.yaml",
+            "/opt/stacks/{1}{0}/compose.yaml",
             "up",
             "-d",
             "--remove-orphans"
           ],
           "description": "Create or update the containers of a stack",
           "name": "compose-up",
-          "timeoutSec": 600
+          "timeoutSec": 600,
+          "remote": "docker"
         },
         {
           "admin": true,
@@ -78,24 +107,29 @@
             {
               "maxLen": 63,
               "pattern": "[a-z0-9][a-z0-9_-]{0,62}"
+            },
+            {
+              "maxLen": 32,
+              "pattern": "(\\.envs/env-[0-9a-f]{8}/)?"
             }
           ],
           "argv": [
             "docker",
             "-H",
-            "unix:///var/run/docker.sock",
+            "{env}",
             "compose",
             "--project-name",
             "{0}",
             "--project-directory",
-            "/opt/stacks/{0}",
+            "/opt/stacks/{1}{0}",
             "-f",
-            "/opt/stacks/{0}/compose.yaml",
+            "/opt/stacks/{1}{0}/compose.yaml",
             "pull"
           ],
           "description": "Pull the images of a stack",
           "name": "compose-pull",
-          "timeoutSec": 600
+          "timeoutSec": 600,
+          "remote": "docker"
         },
         {
           "admin": true,
@@ -104,25 +138,30 @@
             {
               "maxLen": 63,
               "pattern": "[a-z0-9][a-z0-9_-]{0,62}"
+            },
+            {
+              "maxLen": 32,
+              "pattern": "(\\.envs/env-[0-9a-f]{8}/)?"
             }
           ],
           "argv": [
             "docker",
             "-H",
-            "unix:///var/run/docker.sock",
+            "{env}",
             "compose",
             "--project-name",
             "{0}",
             "--project-directory",
-            "/opt/stacks/{0}",
+            "/opt/stacks/{1}{0}",
             "-f",
-            "/opt/stacks/{0}/compose.yaml",
+            "/opt/stacks/{1}{0}/compose.yaml",
             "down",
             "--remove-orphans"
           ],
           "description": "Stop and remove the containers of a stack",
           "name": "compose-down",
-          "timeoutSec": 300
+          "timeoutSec": 300,
+          "remote": "docker"
         },
         {
           "admin": true,
@@ -131,26 +170,31 @@
             {
               "maxLen": 63,
               "pattern": "[a-z0-9][a-z0-9_-]{0,62}"
+            },
+            {
+              "maxLen": 32,
+              "pattern": "(\\.envs/env-[0-9a-f]{8}/)?"
             }
           ],
           "argv": [
             "docker",
             "-H",
-            "unix:///var/run/docker.sock",
+            "{env}",
             "compose",
             "--project-name",
             "{0}",
             "--project-directory",
-            "/opt/stacks/{0}",
+            "/opt/stacks/{1}{0}",
             "-f",
-            "/opt/stacks/{0}/compose.yaml",
+            "/opt/stacks/{1}{0}/compose.yaml",
             "down",
             "--remove-orphans",
             "--volumes"
           ],
           "description": "Stop and remove the containers and volumes of a stack",
           "name": "compose-down-volumes",
-          "timeoutSec": 300
+          "timeoutSec": 300,
+          "remote": "docker"
         },
         {
           "admin": true,
@@ -159,24 +203,29 @@
             {
               "maxLen": 63,
               "pattern": "[a-z0-9][a-z0-9_-]{0,62}"
+            },
+            {
+              "maxLen": 32,
+              "pattern": "(\\.envs/env-[0-9a-f]{8}/)?"
             }
           ],
           "argv": [
             "docker",
             "-H",
-            "unix:///var/run/docker.sock",
+            "{env}",
             "compose",
             "--project-name",
             "{0}",
             "--project-directory",
-            "/opt/stacks/{0}",
+            "/opt/stacks/{1}{0}",
             "-f",
-            "/opt/stacks/{0}/compose.yaml",
+            "/opt/stacks/{1}{0}/compose.yaml",
             "restart"
           ],
           "description": "Restart the containers of a stack",
           "name": "compose-restart",
-          "timeoutSec": 300
+          "timeoutSec": 300,
+          "remote": "docker"
         },
         {
           "admin": true,
@@ -185,24 +234,29 @@
             {
               "maxLen": 63,
               "pattern": "[a-z0-9][a-z0-9_-]{0,62}"
+            },
+            {
+              "maxLen": 32,
+              "pattern": "(\\.envs/env-[0-9a-f]{8}/)?"
             }
           ],
           "argv": [
             "docker",
             "-H",
-            "unix:///var/run/docker.sock",
+            "{env}",
             "compose",
             "--project-name",
             "{0}",
             "--project-directory",
-            "/opt/stacks/{0}",
+            "/opt/stacks/{1}{0}",
             "-f",
-            "/opt/stacks/{0}/compose.yaml",
+            "/opt/stacks/{1}{0}/compose.yaml",
             "stop"
           ],
           "description": "Stop the containers of a stack",
           "name": "compose-stop",
-          "timeoutSec": 300
+          "timeoutSec": 300,
+          "remote": "docker"
         },
         {
           "admin": true,
@@ -211,24 +265,29 @@
             {
               "maxLen": 63,
               "pattern": "[a-z0-9][a-z0-9_-]{0,62}"
+            },
+            {
+              "maxLen": 32,
+              "pattern": "(\\.envs/env-[0-9a-f]{8}/)?"
             }
           ],
           "argv": [
             "docker",
             "-H",
-            "unix:///var/run/docker.sock",
+            "{env}",
             "compose",
             "--project-name",
             "{0}",
             "--project-directory",
-            "/opt/stacks/{0}",
+            "/opt/stacks/{1}{0}",
             "-f",
-            "/opt/stacks/{0}/compose.yaml",
+            "/opt/stacks/{1}{0}/compose.yaml",
             "start"
           ],
           "description": "Start the containers of a stack",
           "name": "compose-start",
-          "timeoutSec": 300
+          "timeoutSec": 300,
+          "remote": "docker"
         },
         {
           "admin": true,
@@ -237,24 +296,29 @@
             {
               "maxLen": 63,
               "pattern": "[a-z0-9][a-z0-9_-]{0,62}"
+            },
+            {
+              "maxLen": 32,
+              "pattern": "(\\.envs/env-[0-9a-f]{8}/)?"
             }
           ],
           "argv": [
             "docker",
             "-H",
-            "unix:///var/run/docker.sock",
+            "{env}",
             "compose",
             "--project-name",
             "{0}",
             "--project-directory",
-            "/opt/stacks/{0}",
+            "/opt/stacks/{1}{0}",
             "-f",
-            "/opt/stacks/{0}/compose.yaml",
+            "/opt/stacks/{1}{0}/compose.yaml",
             "config"
           ],
           "description": "Check a stack's compose file and show it fully resolved",
           "name": "compose-config",
-          "timeoutSec": 60
+          "timeoutSec": 60,
+          "remote": "docker"
         },
         {
           "admin": true,
@@ -268,7 +332,7 @@
           "argv": [
             "docker",
             "-H",
-            "unix:///var/run/docker.sock",
+            "{env}",
             "compose",
             "--project-name",
             "{0}",
@@ -276,7 +340,8 @@
           ],
           "description": "Stop and remove the containers of a compose project, by project name",
           "name": "compose-p-down",
-          "timeoutSec": 300
+          "timeoutSec": 300,
+          "remote": "docker"
         },
         {
           "admin": true,
@@ -290,7 +355,7 @@
           "argv": [
             "docker",
             "-H",
-            "unix:///var/run/docker.sock",
+            "{env}",
             "compose",
             "--project-name",
             "{0}",
@@ -298,7 +363,8 @@
           ],
           "description": "Restart the containers of a compose project, by project name",
           "name": "compose-p-restart",
-          "timeoutSec": 300
+          "timeoutSec": 300,
+          "remote": "docker"
         },
         {
           "admin": true,
@@ -312,7 +378,7 @@
           "argv": [
             "docker",
             "-H",
-            "unix:///var/run/docker.sock",
+            "{env}",
             "compose",
             "--project-name",
             "{0}",
@@ -320,7 +386,8 @@
           ],
           "description": "Stop the containers of a compose project, by project name",
           "name": "compose-p-stop",
-          "timeoutSec": 300
+          "timeoutSec": 300,
+          "remote": "docker"
         },
         {
           "admin": true,
@@ -334,7 +401,7 @@
           "argv": [
             "docker",
             "-H",
-            "unix:///var/run/docker.sock",
+            "{env}",
             "compose",
             "--project-name",
             "{0}",
@@ -342,7 +409,8 @@
           ],
           "description": "Start the containers of a compose project, by project name",
           "name": "compose-p-start",
-          "timeoutSec": 300
+          "timeoutSec": 300,
+          "remote": "docker"
         },
         {
           "admin": true,
@@ -360,7 +428,7 @@
           "argv": [
             "docker",
             "-H",
-            "unix:///var/run/docker.sock",
+            "{env}",
             "compose",
             "--project-name",
             "{0}",
@@ -370,7 +438,8 @@
           ],
           "description": "Show a compose project outside /opt/stacks, fully resolved (read only)",
           "name": "compose-config-project",
-          "timeoutSec": 60
+          "timeoutSec": 60,
+          "remote": "docker"
         },
         {
           "admin": true,
@@ -378,7 +447,7 @@
           "argv": [
             "docker",
             "-H",
-            "unix:///var/run/docker.sock",
+            "{env}",
             "compose",
             "ls",
             "-a",
@@ -387,7 +456,8 @@
           ],
           "description": "List compose projects, including the ones not managed here",
           "name": "compose-ls",
-          "timeoutSec": 30
+          "timeoutSec": 30,
+          "remote": "docker"
         },
         {
           "admin": true,
@@ -403,6 +473,689 @@
           "description": "Create the shared stacks folder /opt/stacks, writable by the docker group",
           "name": "stacks-init",
           "timeoutSec": 30
+        },
+        {
+          "timeoutSec": 10,
+          "name": "git-version",
+          "description": "Check that git is installed",
+          "argv": [
+            "git",
+            "--version"
+          ],
+          "args": []
+        },
+        {
+          "timeoutSec": 10,
+          "name": "ssh-version",
+          "description": "Check that ssh is installed (needed for repositories that use a deploy key)",
+          "argv": [
+            "ssh",
+            "-V"
+          ],
+          "args": []
+        },
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "timeoutSec": 60,
+          "name": "git-ls-remote",
+          "description": "List the branches and tags of a Git repository",
+          "argv": [
+            "git",
+            "-c",
+            "protocol.allow=never",
+            "-c",
+            "protocol.https.allow=always",
+            "-c",
+            "protocol.http.allow=always",
+            "-c",
+            "protocol.ssh.allow=always",
+            "-c",
+            "credential.helper=",
+            "-c",
+            "credential.helper=store --file ~/.config/ervisio/plugins/docker/git/{0}.cred",
+            "-c",
+            "core.sshCommand=ssh -i ~/.config/ervisio/plugins/docker/git/{0}.key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new",
+            "-c",
+            "core.askPass=",
+            "-c",
+            "http.lowSpeedLimit=1000",
+            "-c",
+            "http.lowSpeedTime=60",
+            "ls-remote",
+            "--symref",
+            "--",
+            "{1}"
+          ],
+          "args": [
+            {
+              "pattern": "[a-z0-9][a-z0-9_-]{0,62}",
+              "maxLen": 63
+            },
+            {
+              "pattern": "https?://[A-Za-z0-9][A-Za-z0-9.-]*(:[0-9]+)?(/[A-Za-z0-9._~%+-]+)+/?|ssh://([A-Za-z0-9._-]+@)?[A-Za-z0-9][A-Za-z0-9.-]*(:[0-9]+)?(/[A-Za-z0-9._~%+-]+)+/?|[A-Za-z0-9._-]+@[A-Za-z0-9][A-Za-z0-9.-]*:[A-Za-z0-9._~%+-][A-Za-z0-9._~%+/-]*",
+              "maxLen": 512
+            }
+          ]
+        },
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "timeoutSec": 300,
+          "name": "git-clone",
+          "description": "Clone a Git repository into a new stack folder",
+          "argv": [
+            "git",
+            "-c",
+            "protocol.allow=never",
+            "-c",
+            "protocol.https.allow=always",
+            "-c",
+            "protocol.http.allow=always",
+            "-c",
+            "protocol.ssh.allow=always",
+            "-c",
+            "credential.helper=",
+            "-c",
+            "credential.helper=store --file ~/.config/ervisio/plugins/docker/git/{0}.cred",
+            "-c",
+            "core.sshCommand=ssh -i ~/.config/ervisio/plugins/docker/git/{0}.key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new",
+            "-c",
+            "core.askPass=",
+            "-c",
+            "http.lowSpeedLimit=1000",
+            "-c",
+            "http.lowSpeedTime=60",
+            "clone",
+            "--depth",
+            "1",
+            "--single-branch",
+            "--branch",
+            "{2}",
+            "--",
+            "{1}",
+            "/opt/stacks/{0}"
+          ],
+          "args": [
+            {
+              "pattern": "[a-z0-9][a-z0-9_-]{0,62}",
+              "maxLen": 63
+            },
+            {
+              "pattern": "https?://[A-Za-z0-9][A-Za-z0-9.-]*(:[0-9]+)?(/[A-Za-z0-9._~%+-]+)+/?|ssh://([A-Za-z0-9._-]+@)?[A-Za-z0-9][A-Za-z0-9.-]*(:[0-9]+)?(/[A-Za-z0-9._~%+-]+)+/?|[A-Za-z0-9._-]+@[A-Za-z0-9][A-Za-z0-9.-]*:[A-Za-z0-9._~%+-][A-Za-z0-9._~%+/-]*",
+              "maxLen": 512
+            },
+            {
+              "pattern": "[A-Za-z0-9][A-Za-z0-9._/-]{0,127}",
+              "maxLen": 128
+            }
+          ]
+        },
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "timeoutSec": 300,
+          "name": "git-fetch",
+          "description": "Fetch a branch or tag of the stack repository",
+          "argv": [
+            "git",
+            "-c",
+            "protocol.allow=never",
+            "-c",
+            "protocol.https.allow=always",
+            "-c",
+            "protocol.http.allow=always",
+            "-c",
+            "protocol.ssh.allow=always",
+            "-c",
+            "credential.helper=",
+            "-c",
+            "credential.helper=store --file ~/.config/ervisio/plugins/docker/git/{0}.cred",
+            "-c",
+            "core.sshCommand=ssh -i ~/.config/ervisio/plugins/docker/git/{0}.key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new",
+            "-c",
+            "core.askPass=",
+            "-c",
+            "http.lowSpeedLimit=1000",
+            "-c",
+            "http.lowSpeedTime=60",
+            "-c",
+            "safe.directory=/opt/stacks/{0}",
+            "-C",
+            "/opt/stacks/{0}",
+            "fetch",
+            "--depth",
+            "1",
+            "--force",
+            "origin",
+            "{1}"
+          ],
+          "args": [
+            {
+              "pattern": "[a-z0-9][a-z0-9_-]{0,62}",
+              "maxLen": 63
+            },
+            {
+              "pattern": "[A-Za-z0-9][A-Za-z0-9._/-]{0,127}",
+              "maxLen": 128
+            }
+          ]
+        },
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "timeoutSec": 30,
+          "name": "git-rev-head",
+          "description": "Commit the stack repository is at",
+          "argv": [
+            "git",
+            "-c",
+            "protocol.allow=never",
+            "-c",
+            "protocol.https.allow=always",
+            "-c",
+            "protocol.http.allow=always",
+            "-c",
+            "protocol.ssh.allow=always",
+            "-c",
+            "credential.helper=",
+            "-c",
+            "credential.helper=store --file ~/.config/ervisio/plugins/docker/git/{0}.cred",
+            "-c",
+            "core.sshCommand=ssh -i ~/.config/ervisio/plugins/docker/git/{0}.key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new",
+            "-c",
+            "core.askPass=",
+            "-c",
+            "http.lowSpeedLimit=1000",
+            "-c",
+            "http.lowSpeedTime=60",
+            "-c",
+            "safe.directory=/opt/stacks/{0}",
+            "-C",
+            "/opt/stacks/{0}",
+            "rev-parse",
+            "HEAD"
+          ],
+          "args": [
+            {
+              "pattern": "[a-z0-9][a-z0-9_-]{0,62}",
+              "maxLen": 63
+            }
+          ]
+        },
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "timeoutSec": 30,
+          "name": "git-rev-fetched",
+          "description": "Commit of the last fetch",
+          "argv": [
+            "git",
+            "-c",
+            "protocol.allow=never",
+            "-c",
+            "protocol.https.allow=always",
+            "-c",
+            "protocol.http.allow=always",
+            "-c",
+            "protocol.ssh.allow=always",
+            "-c",
+            "credential.helper=",
+            "-c",
+            "credential.helper=store --file ~/.config/ervisio/plugins/docker/git/{0}.cred",
+            "-c",
+            "core.sshCommand=ssh -i ~/.config/ervisio/plugins/docker/git/{0}.key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new",
+            "-c",
+            "core.askPass=",
+            "-c",
+            "http.lowSpeedLimit=1000",
+            "-c",
+            "http.lowSpeedTime=60",
+            "-c",
+            "safe.directory=/opt/stacks/{0}",
+            "-C",
+            "/opt/stacks/{0}",
+            "rev-list",
+            "-n",
+            "1",
+            "FETCH_HEAD"
+          ],
+          "args": [
+            {
+              "pattern": "[a-z0-9][a-z0-9_-]{0,62}",
+              "maxLen": 63
+            }
+          ]
+        },
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "timeoutSec": 60,
+          "name": "git-reset",
+          "description": "Move the stack repository to the commit of the last fetch (replaces local edits)",
+          "argv": [
+            "git",
+            "-c",
+            "protocol.allow=never",
+            "-c",
+            "protocol.https.allow=always",
+            "-c",
+            "protocol.http.allow=always",
+            "-c",
+            "protocol.ssh.allow=always",
+            "-c",
+            "credential.helper=",
+            "-c",
+            "credential.helper=store --file ~/.config/ervisio/plugins/docker/git/{0}.cred",
+            "-c",
+            "core.sshCommand=ssh -i ~/.config/ervisio/plugins/docker/git/{0}.key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new",
+            "-c",
+            "core.askPass=",
+            "-c",
+            "http.lowSpeedLimit=1000",
+            "-c",
+            "http.lowSpeedTime=60",
+            "-c",
+            "safe.directory=/opt/stacks/{0}",
+            "-C",
+            "/opt/stacks/{0}",
+            "reset",
+            "--hard",
+            "FETCH_HEAD"
+          ],
+          "args": [
+            {
+              "pattern": "[a-z0-9][a-z0-9_-]{0,62}",
+              "maxLen": 63
+            }
+          ]
+        },
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "timeoutSec": 30,
+          "name": "git-info",
+          "description": "Describe the commit the stack repository is at",
+          "argv": [
+            "git",
+            "-c",
+            "protocol.allow=never",
+            "-c",
+            "protocol.https.allow=always",
+            "-c",
+            "protocol.http.allow=always",
+            "-c",
+            "protocol.ssh.allow=always",
+            "-c",
+            "credential.helper=",
+            "-c",
+            "credential.helper=store --file ~/.config/ervisio/plugins/docker/git/{0}.cred",
+            "-c",
+            "core.sshCommand=ssh -i ~/.config/ervisio/plugins/docker/git/{0}.key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new",
+            "-c",
+            "core.askPass=",
+            "-c",
+            "http.lowSpeedLimit=1000",
+            "-c",
+            "http.lowSpeedTime=60",
+            "-c",
+            "safe.directory=/opt/stacks/{0}",
+            "-C",
+            "/opt/stacks/{0}",
+            "log",
+            "-1",
+            "--format=%H%x1f%an%x1f%aI%x1f%s"
+          ],
+          "args": [
+            {
+              "pattern": "[a-z0-9][a-z0-9_-]{0,62}",
+              "maxLen": 63
+            }
+          ]
+        },
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "timeoutSec": 30,
+          "name": "git-status",
+          "description": "List local edits of tracked files in the stack repository",
+          "argv": [
+            "git",
+            "-c",
+            "protocol.allow=never",
+            "-c",
+            "protocol.https.allow=always",
+            "-c",
+            "protocol.http.allow=always",
+            "-c",
+            "protocol.ssh.allow=always",
+            "-c",
+            "credential.helper=",
+            "-c",
+            "credential.helper=store --file ~/.config/ervisio/plugins/docker/git/{0}.cred",
+            "-c",
+            "core.sshCommand=ssh -i ~/.config/ervisio/plugins/docker/git/{0}.key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new",
+            "-c",
+            "core.askPass=",
+            "-c",
+            "http.lowSpeedLimit=1000",
+            "-c",
+            "http.lowSpeedTime=60",
+            "-c",
+            "safe.directory=/opt/stacks/{0}",
+            "-C",
+            "/opt/stacks/{0}",
+            "status",
+            "--porcelain",
+            "--untracked-files=no"
+          ],
+          "args": [
+            {
+              "pattern": "[a-z0-9][a-z0-9_-]{0,62}",
+              "maxLen": 63
+            }
+          ]
+        },
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "timeoutSec": 600,
+          "name": "compose-up-git",
+          "description": "Create or update the containers of a Git stack",
+          "argv": [
+            "docker",
+            "-H",
+            "unix:///var/run/docker.sock",
+            "compose",
+            "--project-name",
+            "{0}",
+            "-f",
+            "/opt/stacks/{0}/{1}",
+            "up",
+            "-d",
+            "--remove-orphans",
+            "--build"
+          ],
+          "args": [
+            {
+              "pattern": "[a-z0-9][a-z0-9_-]{0,62}",
+              "maxLen": 63
+            },
+            {
+              "pattern": "([A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*/)*[A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*\\.ya?ml",
+              "maxLen": 200
+            }
+          ]
+        },
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "timeoutSec": 600,
+          "name": "compose-pull-git",
+          "description": "Pull the images of a Git stack",
+          "argv": [
+            "docker",
+            "-H",
+            "unix:///var/run/docker.sock",
+            "compose",
+            "--project-name",
+            "{0}",
+            "-f",
+            "/opt/stacks/{0}/{1}",
+            "pull",
+            "--ignore-buildable",
+            "--ignore-pull-failures"
+          ],
+          "args": [
+            {
+              "pattern": "[a-z0-9][a-z0-9_-]{0,62}",
+              "maxLen": 63
+            },
+            {
+              "pattern": "([A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*/)*[A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*\\.ya?ml",
+              "maxLen": 200
+            }
+          ]
+        },
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "timeoutSec": 60,
+          "name": "compose-config-git",
+          "description": "Check the compose file of a Git stack",
+          "argv": [
+            "docker",
+            "-H",
+            "unix:///var/run/docker.sock",
+            "compose",
+            "--project-name",
+            "{0}",
+            "-f",
+            "/opt/stacks/{0}/{1}",
+            "config"
+          ],
+          "args": [
+            {
+              "pattern": "[a-z0-9][a-z0-9_-]{0,62}",
+              "maxLen": 63
+            },
+            {
+              "pattern": "([A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*/)*[A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*\\.ya?ml",
+              "maxLen": 200
+            }
+          ]
+        },
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "timeoutSec": 300,
+          "name": "compose-down-git",
+          "description": "Remove the containers of a Git stack",
+          "argv": [
+            "docker",
+            "-H",
+            "unix:///var/run/docker.sock",
+            "compose",
+            "--project-name",
+            "{0}",
+            "-f",
+            "/opt/stacks/{0}/{1}",
+            "down",
+            "--remove-orphans"
+          ],
+          "args": [
+            {
+              "pattern": "[a-z0-9][a-z0-9_-]{0,62}",
+              "maxLen": 63
+            },
+            {
+              "pattern": "([A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*/)*[A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*\\.ya?ml",
+              "maxLen": 200
+            }
+          ]
+        },
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "timeoutSec": 300,
+          "name": "compose-down-volumes-git",
+          "description": "Remove the containers and volumes of a Git stack",
+          "argv": [
+            "docker",
+            "-H",
+            "unix:///var/run/docker.sock",
+            "compose",
+            "--project-name",
+            "{0}",
+            "-f",
+            "/opt/stacks/{0}/{1}",
+            "down",
+            "--remove-orphans",
+            "--volumes"
+          ],
+          "args": [
+            {
+              "pattern": "[a-z0-9][a-z0-9_-]{0,62}",
+              "maxLen": 63
+            },
+            {
+              "pattern": "([A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*/)*[A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*\\.ya?ml",
+              "maxLen": 200
+            }
+          ]
+        },
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "timeoutSec": 30,
+          "name": "stack-mark",
+          "description": "Remember the compose file a stack was last deployed with",
+          "argv": [
+            "cp",
+            "-f",
+            "--",
+            "/opt/stacks/{0}/{1}",
+            "/opt/stacks/{0}/.compose.deployed.yaml"
+          ],
+          "args": [
+            {
+              "pattern": "[a-z0-9][a-z0-9_-]{0,62}",
+              "maxLen": 63
+            },
+            {
+              "pattern": "([A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*/)*[A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*\\.ya?ml",
+              "maxLen": 200
+            }
+          ]
+        },
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "timeoutSec": 600,
+          "name": "container-redeploy",
+          "description": "Pull the image of a container and recreate it with the same settings (Watchtower, one run)",
+          "argv": [
+            "docker",
+            "-H",
+            "unix:///var/run/docker.sock",
+            "run",
+            "--rm",
+            "--name",
+            "{0}-redeploy",
+            "-v",
+            "/var/run/docker.sock:/var/run/docker.sock",
+            "-e",
+            "WATCHTOWER_RUN_ONCE=true",
+            "-e",
+            "WATCHTOWER_CLEANUP=true",
+            "-e",
+            "WATCHTOWER_NO_STARTUP_MESSAGE=true",
+            "-e",
+            "WATCHTOWER_LOG_FORMAT=LogFmt",
+            "{1}",
+            "{0}"
+          ],
+          "args": [
+            {
+              "pattern": "[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}",
+              "maxLen": 128
+            },
+            {
+              "pattern": "[a-z0-9][a-z0-9._/-]{0,127}(:[A-Za-z0-9._-]{1,128})?",
+              "maxLen": 256
+            }
+          ]
+        },
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "timeoutSec": 600,
+          "name": "volume-image",
+          "description": "Make sure the helper image of volume backups is on this machine, pulling it when it is not",
+          "argv": [
+            "sh",
+            "-c",
+            "i=\"$1\"; d=\"docker -H unix:///var/run/docker.sock\"; $d image inspect \"$i\" >/dev/null 2>&1 && exit 0; $d pull --quiet \"$i\" >/dev/null || { echo \"Could not download the helper image $i. Check that this server can reach Docker Hub, or load it with docker load, then run the backup again.\" >&2; exit 1; }",
+            "sh",
+            "busybox:1.37"
+          ],
+          "args": []
+        },
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "timeoutSec": 600,
+          "name": "volume-backup",
+          "description": "Write a tar of a volume to the backup folder and delete the oldest ones",
+          "argv": [
+            "docker",
+            "-H",
+            "unix:///var/run/docker.sock",
+            "run",
+            "--rm",
+            "--network",
+            "none",
+            "-v",
+            "{0}:/v:ro",
+            "-v",
+            "/var/backups/ervisio-docker/{0}:/out",
+            "busybox:1.37",
+            "sh",
+            "-c",
+            "set -e; f=/out/$(date -u +%Y-%m-%d_%H%M%S).tar; tar -cf \"$f.part\" -C /v .; mv \"$f.part\" \"$f\"; ls -1 /out/*.tar | sort -r | tail -n +$(($1+1)) | xargs -r rm -f --",
+            "sh",
+            "{1}"
+          ],
+          "args": [
+            {
+              "pattern": "[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}",
+              "maxLen": 128
+            },
+            {
+              "pattern": "[1-9][0-9]{0,2}",
+              "maxLen": 3
+            }
+          ]
+        },
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "timeoutSec": 30,
+          "name": "volume-check",
+          "description": "Check that a volume exists",
+          "argv": [
+            "docker",
+            "-H",
+            "unix:///var/run/docker.sock",
+            "volume",
+            "inspect",
+            "--format",
+            "{{.Name}}",
+            "{0}"
+          ],
+          "args": [
+            {
+              "pattern": "[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}",
+              "maxLen": 128
+            }
+          ]
+        },
+        {
+          "timeoutSec": 15,
+          "name": "volume-backup-ls",
+          "description": "List the backups of a volume",
+          "argv": [
+            "ls",
+            "-l",
+            "--time-style=long-iso",
+            "/var/backups/ervisio-docker/{0}"
+          ],
+          "args": [
+            {
+              "pattern": "[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}",
+              "maxLen": 128
+            }
+          ]
         }
       ],
       "files": {
@@ -431,9 +1184,11 @@
           "adminUnlessGroup": "docker",
           "headers": [
             "Content-Type",
-            "X-Registry-Auth"
+            "X-Registry-Auth",
+            "X-Registry-Config"
           ],
           "maxBody": 8388608,
+          "maxUpload": 1099511627776,
           "name": "docker",
           "rules": [
             {
@@ -488,6 +1243,18 @@
             },
             {
               "methods": [
+                "PUT"
+              ],
+              "path": "/v1\\.[0-9]+/containers/[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}/archive"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1\\.[0-9]+/commit"
+            },
+            {
+              "methods": [
                 "POST"
               ],
               "path": "/v1\\.[0-9]+/containers/[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}/(start|stop|restart|kill|pause|unpause|rename|update|exec)"
@@ -520,6 +1287,12 @@
               "methods": [
                 "GET"
               ],
+              "path": "/v1\\.[0-9]+/images/get"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
               "path": "/v1\\.[0-9]+/images/[a-zA-Z0-9_:@-]+(?:\\.[a-zA-Z0-9_:@-]+)*(?:/[a-zA-Z0-9_:@-]+(?:\\.[a-zA-Z0-9_:@-]+)*){0,9}/(json|history)"
             },
             {
@@ -532,7 +1305,25 @@
               "methods": [
                 "POST"
               ],
+              "path": "/v1\\.[0-9]+/images/load"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
               "path": "/v1\\.[0-9]+/images/[a-zA-Z0-9_:@-]+(?:\\.[a-zA-Z0-9_:@-]+)*(?:/[a-zA-Z0-9_:@-]+(?:\\.[a-zA-Z0-9_:@-]+)*){0,9}/tag"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1\\.[0-9]+/images/[a-zA-Z0-9_:@-]+(?:\\.[a-zA-Z0-9_:@-]+)*(?:/[a-zA-Z0-9_:@-]+(?:\\.[a-zA-Z0-9_:@-]+)*){0,9}/push"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1\\.[0-9]+/build"
             },
             {
               "methods": [
@@ -608,7 +1399,8 @@
             }
           ],
           "socket": "/var/run/docker.sock",
-          "timeoutSec": 120
+          "timeoutSec": 120,
+          "remote": "docker"
         }
       ],
       "network": [
@@ -617,7 +1409,1005 @@
       ],
       "sockets": [
         "/var/run/docker.sock"
-      ]
+      ],
+      "jobs": [
+        {
+          "name": "git-poll-n",
+          "description": "Update a Git stack when its branch or tag moved (quiet).",
+          "timeoutSec": 7200,
+          "params": [
+            {
+              "name": "name",
+              "pattern": "[a-z0-9][a-z0-9_-]{0,62}",
+              "maxLen": 63,
+              "description": "Stack name"
+            },
+            {
+              "name": "ref",
+              "pattern": "[A-Za-z0-9][A-Za-z0-9._/-]{0,127}",
+              "maxLen": 128,
+              "description": "Branch or tag"
+            },
+            {
+              "name": "file",
+              "pattern": "([A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*/)*[A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*\\.ya?ml",
+              "maxLen": 200,
+              "description": "Compose file inside the repository",
+              "default": "compose.yaml"
+            }
+          ],
+          "steps": [
+            {
+              "id": "fetch",
+              "command": "git-fetch",
+              "args": [
+                "{param.name}",
+                "{param.ref}"
+              ]
+            },
+            {
+              "id": "head",
+              "command": "git-rev-head",
+              "args": [
+                "{param.name}"
+              ]
+            },
+            {
+              "id": "new",
+              "command": "git-rev-fetched",
+              "args": [
+                "{param.name}"
+              ]
+            },
+            {
+              "id": "reset",
+              "if": {
+                "step": "new",
+                "when": "differs",
+                "other": "head"
+              },
+              "command": "git-reset",
+              "args": [
+                "{param.name}"
+              ]
+            },
+            {
+              "id": "pull",
+              "if": {
+                "step": "reset",
+                "when": "ok"
+              },
+              "command": "compose-pull-git",
+              "args": [
+                "{param.name}",
+                "{param.file}"
+              ],
+              "timeoutSec": 1200
+            },
+            {
+              "id": "up",
+              "if": {
+                "step": "pull",
+                "when": "ok"
+              },
+              "command": "compose-up-git",
+              "args": [
+                "{param.name}",
+                "{param.file}"
+              ],
+              "timeoutSec": 1800
+            },
+            {
+              "id": "mark",
+              "if": {
+                "step": "up",
+                "when": "ok"
+              },
+              "command": "stack-mark",
+              "args": [
+                "{param.name}",
+                "{param.file}"
+              ],
+              "continueOnError": true
+            }
+          ]
+        },
+        {
+          "name": "git-poll-s",
+          "description": "Update a Git stack when its branch or tag moved (notify on success).",
+          "timeoutSec": 7200,
+          "params": [
+            {
+              "name": "name",
+              "pattern": "[a-z0-9][a-z0-9_-]{0,62}",
+              "maxLen": 63,
+              "description": "Stack name"
+            },
+            {
+              "name": "ref",
+              "pattern": "[A-Za-z0-9][A-Za-z0-9._/-]{0,127}",
+              "maxLen": 128,
+              "description": "Branch or tag"
+            },
+            {
+              "name": "file",
+              "pattern": "([A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*/)*[A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*\\.ya?ml",
+              "maxLen": 200,
+              "description": "Compose file inside the repository",
+              "default": "compose.yaml"
+            }
+          ],
+          "steps": [
+            {
+              "id": "fetch",
+              "command": "git-fetch",
+              "args": [
+                "{param.name}",
+                "{param.ref}"
+              ]
+            },
+            {
+              "id": "head",
+              "command": "git-rev-head",
+              "args": [
+                "{param.name}"
+              ]
+            },
+            {
+              "id": "new",
+              "command": "git-rev-fetched",
+              "args": [
+                "{param.name}"
+              ]
+            },
+            {
+              "id": "reset",
+              "if": {
+                "step": "new",
+                "when": "differs",
+                "other": "head"
+              },
+              "command": "git-reset",
+              "args": [
+                "{param.name}"
+              ]
+            },
+            {
+              "id": "pull",
+              "if": {
+                "step": "reset",
+                "when": "ok"
+              },
+              "command": "compose-pull-git",
+              "args": [
+                "{param.name}",
+                "{param.file}"
+              ],
+              "timeoutSec": 1200
+            },
+            {
+              "id": "up",
+              "if": {
+                "step": "pull",
+                "when": "ok"
+              },
+              "command": "compose-up-git",
+              "args": [
+                "{param.name}",
+                "{param.file}"
+              ],
+              "timeoutSec": 1800
+            },
+            {
+              "id": "mark",
+              "if": {
+                "step": "up",
+                "when": "ok"
+              },
+              "command": "stack-mark",
+              "args": [
+                "{param.name}",
+                "{param.file}"
+              ],
+              "continueOnError": true
+            },
+            {
+              "id": "said",
+              "if": {
+                "step": "up",
+                "when": "ok"
+              },
+              "notify": {
+                "title": "Updated {param.name}",
+                "body": "Now at {step.new.stdout}",
+                "level": "success",
+                "link": "/p/docker"
+              }
+            }
+          ]
+        },
+        {
+          "name": "git-poll-f",
+          "description": "Update a Git stack when its branch or tag moved (notify on failure).",
+          "timeoutSec": 7200,
+          "params": [
+            {
+              "name": "name",
+              "pattern": "[a-z0-9][a-z0-9_-]{0,62}",
+              "maxLen": 63,
+              "description": "Stack name"
+            },
+            {
+              "name": "ref",
+              "pattern": "[A-Za-z0-9][A-Za-z0-9._/-]{0,127}",
+              "maxLen": 128,
+              "description": "Branch or tag"
+            },
+            {
+              "name": "file",
+              "pattern": "([A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*/)*[A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*\\.ya?ml",
+              "maxLen": 200,
+              "description": "Compose file inside the repository",
+              "default": "compose.yaml"
+            }
+          ],
+          "steps": [
+            {
+              "id": "fetch",
+              "command": "git-fetch",
+              "args": [
+                "{param.name}",
+                "{param.ref}"
+              ],
+              "continueOnError": true
+            },
+            {
+              "id": "head",
+              "command": "git-rev-head",
+              "args": [
+                "{param.name}"
+              ],
+              "if": {
+                "step": "fetch",
+                "when": "ok"
+              },
+              "continueOnError": true
+            },
+            {
+              "id": "new",
+              "command": "git-rev-fetched",
+              "args": [
+                "{param.name}"
+              ],
+              "if": {
+                "step": "fetch",
+                "when": "ok"
+              },
+              "continueOnError": true
+            },
+            {
+              "id": "reset",
+              "if": {
+                "step": "new",
+                "when": "differs",
+                "other": "head"
+              },
+              "command": "git-reset",
+              "args": [
+                "{param.name}"
+              ],
+              "continueOnError": true
+            },
+            {
+              "id": "pull",
+              "if": {
+                "step": "reset",
+                "when": "ok"
+              },
+              "command": "compose-pull-git",
+              "args": [
+                "{param.name}",
+                "{param.file}"
+              ],
+              "timeoutSec": 1200,
+              "continueOnError": true
+            },
+            {
+              "id": "up",
+              "if": {
+                "step": "pull",
+                "when": "ok"
+              },
+              "command": "compose-up-git",
+              "args": [
+                "{param.name}",
+                "{param.file}"
+              ],
+              "timeoutSec": 1800,
+              "continueOnError": true
+            },
+            {
+              "id": "mark",
+              "if": {
+                "step": "up",
+                "when": "ok"
+              },
+              "command": "stack-mark",
+              "args": [
+                "{param.name}",
+                "{param.file}"
+              ],
+              "continueOnError": true
+            },
+            {
+              "id": "fail_fetch",
+              "if": {
+                "step": "fetch",
+                "when": "failed"
+              },
+              "notify": {
+                "title": "Could not fetch {param.name}",
+                "body": "{step.fetch.stderr}",
+                "level": "error",
+                "link": "/p/docker"
+              }
+            },
+            {
+              "id": "fail_reset",
+              "if": {
+                "step": "reset",
+                "when": "failed"
+              },
+              "notify": {
+                "title": "Could not update the files of {param.name}",
+                "body": "{step.reset.stderr}",
+                "level": "error",
+                "link": "/p/docker"
+              }
+            },
+            {
+              "id": "fail_pull",
+              "if": {
+                "step": "pull",
+                "when": "failed"
+              },
+              "notify": {
+                "title": "Could not pull the images of {param.name}",
+                "body": "{step.pull.stderr}",
+                "level": "error",
+                "link": "/p/docker"
+              }
+            },
+            {
+              "id": "fail_up",
+              "if": {
+                "step": "up",
+                "when": "failed"
+              },
+              "notify": {
+                "title": "Could not start {param.name}",
+                "body": "{step.up.stderr}",
+                "level": "error",
+                "link": "/p/docker"
+              }
+            }
+          ]
+        },
+        {
+          "name": "git-poll-b",
+          "description": "Update a Git stack when its branch or tag moved (notify on success and failure).",
+          "timeoutSec": 7200,
+          "params": [
+            {
+              "name": "name",
+              "pattern": "[a-z0-9][a-z0-9_-]{0,62}",
+              "maxLen": 63,
+              "description": "Stack name"
+            },
+            {
+              "name": "ref",
+              "pattern": "[A-Za-z0-9][A-Za-z0-9._/-]{0,127}",
+              "maxLen": 128,
+              "description": "Branch or tag"
+            },
+            {
+              "name": "file",
+              "pattern": "([A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*/)*[A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*\\.ya?ml",
+              "maxLen": 200,
+              "description": "Compose file inside the repository",
+              "default": "compose.yaml"
+            }
+          ],
+          "steps": [
+            {
+              "id": "fetch",
+              "command": "git-fetch",
+              "args": [
+                "{param.name}",
+                "{param.ref}"
+              ],
+              "continueOnError": true
+            },
+            {
+              "id": "head",
+              "command": "git-rev-head",
+              "args": [
+                "{param.name}"
+              ],
+              "if": {
+                "step": "fetch",
+                "when": "ok"
+              },
+              "continueOnError": true
+            },
+            {
+              "id": "new",
+              "command": "git-rev-fetched",
+              "args": [
+                "{param.name}"
+              ],
+              "if": {
+                "step": "fetch",
+                "when": "ok"
+              },
+              "continueOnError": true
+            },
+            {
+              "id": "reset",
+              "if": {
+                "step": "new",
+                "when": "differs",
+                "other": "head"
+              },
+              "command": "git-reset",
+              "args": [
+                "{param.name}"
+              ],
+              "continueOnError": true
+            },
+            {
+              "id": "pull",
+              "if": {
+                "step": "reset",
+                "when": "ok"
+              },
+              "command": "compose-pull-git",
+              "args": [
+                "{param.name}",
+                "{param.file}"
+              ],
+              "timeoutSec": 1200,
+              "continueOnError": true
+            },
+            {
+              "id": "up",
+              "if": {
+                "step": "pull",
+                "when": "ok"
+              },
+              "command": "compose-up-git",
+              "args": [
+                "{param.name}",
+                "{param.file}"
+              ],
+              "timeoutSec": 1800,
+              "continueOnError": true
+            },
+            {
+              "id": "mark",
+              "if": {
+                "step": "up",
+                "when": "ok"
+              },
+              "command": "stack-mark",
+              "args": [
+                "{param.name}",
+                "{param.file}"
+              ],
+              "continueOnError": true
+            },
+            {
+              "id": "said",
+              "if": {
+                "step": "up",
+                "when": "ok"
+              },
+              "notify": {
+                "title": "Updated {param.name}",
+                "body": "Now at {step.new.stdout}",
+                "level": "success",
+                "link": "/p/docker"
+              }
+            },
+            {
+              "id": "fail_fetch",
+              "if": {
+                "step": "fetch",
+                "when": "failed"
+              },
+              "notify": {
+                "title": "Could not fetch {param.name}",
+                "body": "{step.fetch.stderr}",
+                "level": "error",
+                "link": "/p/docker"
+              }
+            },
+            {
+              "id": "fail_reset",
+              "if": {
+                "step": "reset",
+                "when": "failed"
+              },
+              "notify": {
+                "title": "Could not update the files of {param.name}",
+                "body": "{step.reset.stderr}",
+                "level": "error",
+                "link": "/p/docker"
+              }
+            },
+            {
+              "id": "fail_pull",
+              "if": {
+                "step": "pull",
+                "when": "failed"
+              },
+              "notify": {
+                "title": "Could not pull the images of {param.name}",
+                "body": "{step.pull.stderr}",
+                "level": "error",
+                "link": "/p/docker"
+              }
+            },
+            {
+              "id": "fail_up",
+              "if": {
+                "step": "up",
+                "when": "failed"
+              },
+              "notify": {
+                "title": "Could not start {param.name}",
+                "body": "{step.up.stderr}",
+                "level": "error",
+                "link": "/p/docker"
+              }
+            }
+          ]
+        },
+        {
+          "name": "git-redeploy",
+          "description": "Pull a Git stack and redeploy it (webhook).",
+          "timeoutSec": 7200,
+          "params": [
+            {
+              "name": "name",
+              "pattern": "[a-z0-9][a-z0-9_-]{0,62}",
+              "maxLen": 63,
+              "description": "Stack name"
+            },
+            {
+              "name": "ref",
+              "pattern": "[A-Za-z0-9][A-Za-z0-9._/-]{0,127}",
+              "maxLen": 128,
+              "description": "Branch or tag"
+            },
+            {
+              "name": "file",
+              "pattern": "([A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*/)*[A-Za-z0-9_@+-][A-Za-z0-9_@+.-]*\\.ya?ml",
+              "maxLen": 200,
+              "description": "Compose file inside the repository",
+              "default": "compose.yaml"
+            }
+          ],
+          "steps": [
+            {
+              "id": "fetch",
+              "command": "git-fetch",
+              "args": [
+                "{param.name}",
+                "{param.ref}"
+              ]
+            },
+            {
+              "id": "reset",
+              "command": "git-reset",
+              "args": [
+                "{param.name}"
+              ]
+            },
+            {
+              "id": "pull",
+              "command": "compose-pull-git",
+              "args": [
+                "{param.name}",
+                "{param.file}"
+              ],
+              "timeoutSec": 1200
+            },
+            {
+              "id": "up",
+              "command": "compose-up-git",
+              "args": [
+                "{param.name}",
+                "{param.file}"
+              ],
+              "timeoutSec": 1800
+            },
+            {
+              "id": "mark",
+              "if": {
+                "step": "up",
+                "when": "ok"
+              },
+              "command": "stack-mark",
+              "args": [
+                "{param.name}",
+                "{param.file}"
+              ],
+              "continueOnError": true
+            }
+          ]
+        },
+        {
+          "name": "stack-redeploy",
+          "description": "Pull the images of a stack and redeploy it (webhook).",
+          "timeoutSec": 7200,
+          "params": [
+            {
+              "name": "name",
+              "pattern": "[a-z0-9][a-z0-9_-]{0,62}",
+              "maxLen": 63,
+              "description": "Stack name"
+            }
+          ],
+          "steps": [
+            {
+              "id": "pull",
+              "command": "compose-pull",
+              "args": [
+                "{param.name}",
+                ""
+              ],
+              "timeoutSec": 1200
+            },
+            {
+              "id": "up",
+              "command": "compose-up",
+              "args": [
+                "{param.name}",
+                ""
+              ],
+              "timeoutSec": 1800
+            }
+          ]
+        },
+        {
+          "name": "container-redeploy",
+          "description": "Pull the image of a container and recreate it with the same settings (webhook).",
+          "timeoutSec": 1800,
+          "params": [
+            {
+              "name": "name",
+              "pattern": "[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}",
+              "maxLen": 128,
+              "description": "Container name"
+            },
+            {
+              "name": "image",
+              "pattern": "[a-z0-9][a-z0-9._/-]{0,127}(:[A-Za-z0-9._-]{1,128})?",
+              "maxLen": 256,
+              "description": "Watchtower image",
+              "default": "nickfedor/watchtower:latest"
+            }
+          ],
+          "steps": [
+            {
+              "id": "run",
+              "command": "container-redeploy",
+              "args": [
+                "{param.name}",
+                "{param.image}"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "volume-backup-n",
+          "description": "Write a tar of a volume to the backup folder (quiet).",
+          "timeoutSec": 21600,
+          "params": [
+            {
+              "name": "volume",
+              "pattern": "[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}",
+              "maxLen": 128,
+              "description": "Volume name"
+            },
+            {
+              "name": "keep",
+              "pattern": "[1-9][0-9]{0,2}",
+              "maxLen": 3,
+              "description": "Backups to keep",
+              "default": "7"
+            }
+          ],
+          "steps": [
+            {
+              "id": "image",
+              "command": "volume-image",
+              "args": []
+            },
+            {
+              "id": "check",
+              "command": "volume-check",
+              "args": [
+                "{param.volume}"
+              ]
+            },
+            {
+              "id": "run",
+              "command": "volume-backup",
+              "args": [
+                "{param.volume}",
+                "{param.keep}"
+              ],
+              "timeoutSec": 21600
+            }
+          ]
+        },
+        {
+          "name": "volume-backup-s",
+          "description": "Write a tar of a volume to the backup folder (notify on success).",
+          "timeoutSec": 21600,
+          "params": [
+            {
+              "name": "volume",
+              "pattern": "[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}",
+              "maxLen": 128,
+              "description": "Volume name"
+            },
+            {
+              "name": "keep",
+              "pattern": "[1-9][0-9]{0,2}",
+              "maxLen": 3,
+              "description": "Backups to keep",
+              "default": "7"
+            }
+          ],
+          "steps": [
+            {
+              "id": "image",
+              "command": "volume-image",
+              "args": []
+            },
+            {
+              "id": "check",
+              "command": "volume-check",
+              "args": [
+                "{param.volume}"
+              ]
+            },
+            {
+              "id": "run",
+              "command": "volume-backup",
+              "args": [
+                "{param.volume}",
+                "{param.keep}"
+              ],
+              "timeoutSec": 21600
+            },
+            {
+              "id": "said",
+              "if": {
+                "step": "run",
+                "when": "ok"
+              },
+              "notify": {
+                "title": "Backed up volume {param.volume}",
+                "level": "success",
+                "link": "/p/docker"
+              }
+            }
+          ]
+        },
+        {
+          "name": "volume-backup-f",
+          "description": "Write a tar of a volume to the backup folder (notify on failure).",
+          "timeoutSec": 21600,
+          "params": [
+            {
+              "name": "volume",
+              "pattern": "[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}",
+              "maxLen": 128,
+              "description": "Volume name"
+            },
+            {
+              "name": "keep",
+              "pattern": "[1-9][0-9]{0,2}",
+              "maxLen": 3,
+              "description": "Backups to keep",
+              "default": "7"
+            }
+          ],
+          "steps": [
+            {
+              "id": "image",
+              "command": "volume-image",
+              "args": [],
+              "continueOnError": true
+            },
+            {
+              "id": "check",
+              "if": {
+                "step": "image",
+                "when": "ok"
+              },
+              "command": "volume-check",
+              "args": [
+                "{param.volume}"
+              ],
+              "continueOnError": true
+            },
+            {
+              "id": "run",
+              "if": {
+                "step": "check",
+                "when": "ok"
+              },
+              "command": "volume-backup",
+              "args": [
+                "{param.volume}",
+                "{param.keep}"
+              ],
+              "timeoutSec": 21600,
+              "continueOnError": true
+            },
+            {
+              "id": "fail_image",
+              "if": {
+                "step": "image",
+                "when": "failed"
+              },
+              "notify": {
+                "title": "Backup of volume {param.volume} failed",
+                "body": "{step.image.stderr}",
+                "level": "error",
+                "link": "/p/docker"
+              }
+            },
+            {
+              "id": "fail_check",
+              "if": {
+                "step": "check",
+                "when": "failed"
+              },
+              "notify": {
+                "title": "Backup of volume {param.volume} failed",
+                "body": "{step.check.stderr}",
+                "level": "error",
+                "link": "/p/docker"
+              }
+            },
+            {
+              "id": "fail",
+              "if": {
+                "step": "run",
+                "when": "failed"
+              },
+              "notify": {
+                "title": "Backup of volume {param.volume} failed",
+                "body": "{step.run.stderr}",
+                "level": "error",
+                "link": "/p/docker"
+              }
+            }
+          ]
+        },
+        {
+          "name": "volume-backup-b",
+          "description": "Write a tar of a volume to the backup folder (notify on success and failure).",
+          "timeoutSec": 21600,
+          "params": [
+            {
+              "name": "volume",
+              "pattern": "[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}",
+              "maxLen": 128,
+              "description": "Volume name"
+            },
+            {
+              "name": "keep",
+              "pattern": "[1-9][0-9]{0,2}",
+              "maxLen": 3,
+              "description": "Backups to keep",
+              "default": "7"
+            }
+          ],
+          "steps": [
+            {
+              "id": "image",
+              "command": "volume-image",
+              "args": [],
+              "continueOnError": true
+            },
+            {
+              "id": "check",
+              "if": {
+                "step": "image",
+                "when": "ok"
+              },
+              "command": "volume-check",
+              "args": [
+                "{param.volume}"
+              ],
+              "continueOnError": true
+            },
+            {
+              "id": "run",
+              "if": {
+                "step": "check",
+                "when": "ok"
+              },
+              "command": "volume-backup",
+              "args": [
+                "{param.volume}",
+                "{param.keep}"
+              ],
+              "timeoutSec": 21600,
+              "continueOnError": true
+            },
+            {
+              "id": "said",
+              "if": {
+                "step": "run",
+                "when": "ok"
+              },
+              "notify": {
+                "title": "Backed up volume {param.volume}",
+                "level": "success",
+                "link": "/p/docker"
+              }
+            },
+            {
+              "id": "fail_image",
+              "if": {
+                "step": "image",
+                "when": "failed"
+              },
+              "notify": {
+                "title": "Backup of volume {param.volume} failed",
+                "body": "{step.image.stderr}",
+                "level": "error",
+                "link": "/p/docker"
+              }
+            },
+            {
+              "id": "fail_check",
+              "if": {
+                "step": "check",
+                "when": "failed"
+              },
+              "notify": {
+                "title": "Backup of volume {param.volume} failed",
+                "body": "{step.check.stderr}",
+                "level": "error",
+                "link": "/p/docker"
+              }
+            },
+            {
+              "id": "fail",
+              "if": {
+                "step": "run",
+                "when": "failed"
+              },
+              "notify": {
+                "title": "Backup of volume {param.volume} failed",
+                "body": "{step.run.stderr}",
+                "level": "error",
+                "link": "/p/docker"
+              }
+            }
+          ]
+        }
+      ],
+      "notify": true
     },
     "contributes": {
       "pages": [
@@ -647,6 +2437,7 @@
         "wheel",
         "sudo"
       ]
-    }
+    },
+    "minCore": "0.5.0"
   }
 }
