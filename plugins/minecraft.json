@@ -1,0 +1,106 @@
+{
+  "id": "minecraft",
+  "repo": "Ervisio/plugin-minecraft",
+  "version": "0.1.0",
+  "tag": "v0.1.0",
+  "asset": "minecraft-0.1.0.tar.gz",
+  "upstreamSha256": "cc3aad8ac576964acae0dadf690700f46b6935302356b48230be1aae33ae5049",
+  "notes": "Initial Minecraft Java server manager for Ervisio (plugin SDK contract 3). Approved layout (round 041, variant A): inner sidebar, server cards with live CPU/memory, status filters, details in a right drawer (bottom sheet on phones). Panels follow the plugin surface convention (`--sunk` panels, `--surface` items). Persistent native runtime (`ervisio-minecraft` service): several servers, console, chunked file transfers, text editor, `server.properties` editor with structured fields, Vanilla/Pap...",
+  "manifest": {
+    "name": "Minecraft",
+    "author": "Ervisio team",
+    "description": "Manage multiple Java Minecraft servers, console, files, software, add-ons, players, worlds and backups.",
+    "homepage": "https://github.com/Ervisio/plugin-minecraft",
+    "icon": "server",
+    "color": "file",
+    "entry": "index.js",
+    "capabilities": {
+      "http": [
+        {
+          "name": "minecraft",
+          "socket": "/run/ervisio-minecraft/control.sock",
+          "admin": true,
+          "adminUnlessGroup": "ervisio-minecraft",
+          "headers": [
+            "Content-Type"
+          ],
+          "rules": [
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1/(health|servers|jobs|activity|catalog/(versions|loaders|addons))"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1/servers"
+            },
+            {
+              "methods": [
+                "GET",
+                "PATCH",
+                "DELETE"
+              ],
+              "path": "/v1/servers/[a-z0-9-]+"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1/servers/[a-z0-9-]+/(logs|files|file|properties|addons|players|worlds|backups|backup-file|schedules)"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1/servers/[a-z0-9-]+/(power|command|files|software|addons|players|worlds|backups)"
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "path": "/v1/servers/[a-z0-9-]+/(file|properties|schedules)"
+            },
+            {
+              "methods": [
+                "PATCH"
+              ],
+              "path": "/v1/servers/[a-z0-9-]+/file"
+            }
+          ],
+          "maxBody": 1048576,
+          "timeoutSec": 60
+        }
+      ],
+      "sockets": [
+        "/run/ervisio-minecraft/control.sock"
+      ]
+    },
+    "contributes": {
+      "pages": [
+        {
+          "id": "minecraft",
+          "title": "Minecraft",
+          "icon": "server"
+        }
+      ],
+      "widgets": [
+        {
+          "id": "servers",
+          "title": "Minecraft servers",
+          "icon": "server"
+        }
+      ]
+    },
+    "visibleTo": {
+      "groups": [
+        "ervisio-minecraft",
+        "wheel",
+        "sudo",
+        "admin"
+      ]
+    }
+  }
+}
