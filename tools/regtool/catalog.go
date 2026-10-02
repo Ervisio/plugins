@@ -1,6 +1,9 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -110,6 +113,7 @@ type CatalogEntry struct {
 	Author       string          `json:"author"`
 	Description  string          `json:"description"`
 	Icon         string          `json:"icon"`
+	Logo         string          `json:"logo,omitempty"`
 	Color        string          `json:"color"`
 	Category     string          `json:"category"`
 	Verified     bool            `json:"verified"`
@@ -163,6 +167,10 @@ func buildCatalog(root, signedDir string, now time.Time) (*CatalogFile, error) {
 		if d := compareReviewed(e, m); len(d) > 0 {
 			return nil, fmt.Errorf("%s: the signed package is not the reviewed one: %s", src.ID, strings.Join(d, "; "))
 		}
+		logo, err := packageLogo(dir)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %v", src.ID, err)
+		}
 		name := src.ID + "-" + e.Version + ".tar.gz"
 		sum, err := fileSHA256(filepath.Join(signedDir, name))
 		if err != nil {
@@ -170,13 +178,52 @@ func buildCatalog(root, signedDir string, now time.Time) (*CatalogFile, error) {
 		}
 		c.Plugins = append(c.Plugins, CatalogEntry{
 			ID: src.ID, Name: m.Reviewed.Name, Version: e.Version, Author: m.Reviewed.Author, Description: m.Reviewed.Description,
-			Icon: m.Reviewed.Icon, Color: m.Reviewed.Color, Category: src.Category, Verified: true, Featured: src.Featured,
+			Icon: m.Reviewed.Icon, Logo: logo, Color: m.Reviewed.Color, Category: src.Category, Verified: true, Featured: src.Featured,
 			Notes: e.Notes, Source: SignedBase + src.ID + "-" + e.Version + "/" + name, SHA256: sum,
 			Capabilities: m.Reviewed.Capabilities, Contributes: m.Reviewed.Contributes, VisibleTo: m.Reviewed.VisibleTo,
 			Homepage: m.Reviewed.Homepage, Repo: src.Repo, Trust: src.Trust,
 		})
 	}
 	return c, nil
+}
+
+// logoFiles and maxLogo follow the core (plugins.LogoFiles, plugins.MaxLogoSize).
+var logoFiles = []struct{ name, mime string }{{"logo.svg", "image/svg+xml"}, {"logo.png", "image/png"}}
+
+const maxLogo = 64 << 10
+
+// packageLogo returns the logo of a signed, unpacked package as a data: URL
+// for the catalog, or "" when it has none. Only a file that the signed
+// manifest lists is used, and its sha256 must be the listed one.
+func packageLogo(dir string) (string, error) {
+	b, err := os.ReadFile(filepath.Join(dir, "manifest.json"))
+	if err != nil {
+		return "", err
+	}
+	var m struct {
+		Files map[string]string `json:"files"`
+	}
+	if err := json.Unmarshal(b, &m); err != nil {
+		return "", fmt.Errorf("manifest.json: %v", err)
+	}
+	for _, l := range logoFiles {
+		want, ok := m.Files[l.name]
+		if !ok {
+			continue
+		}
+		data, err := os.ReadFile(filepath.Join(dir, l.name))
+		if err != nil {
+			return "", err
+		}
+		if sum := sha256.Sum256(data); hex.EncodeToString(sum[:]) != want {
+			return "", fmt.Errorf("%s does not match the signed manifest", l.name)
+		}
+		if len(data) == 0 || len(data) > maxLogo {
+			continue // shown by no console: the catalog keeps the icon
+		}
+		return "data:" + l.mime + ";base64," + base64.StdEncoding.EncodeToString(data), nil
+	}
+	return "", nil
 }
 
 func cmdCatalog(args []string) error {
