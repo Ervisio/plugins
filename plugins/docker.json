@@ -1,11 +1,11 @@
 {
   "id": "docker",
   "repo": "Ervisio/plugin-docker",
-  "version": "2.1.0",
-  "tag": "v2.1.0",
-  "asset": "docker-2.1.0.tar.gz",
-  "upstreamSha256": "2e9fbc454fcf8c4f3791fb03a119abcea489c2dc97d49801aa75d2298d0898c8",
-  "notes": "Stacks started by Portainer now work. Portainer runs `docker compose` inside its own container, so a stack's folder (`/data/compose/<id>`) lives in Portainer's volume and not on the host. Ervisio finds the container that mounts that folder, reads the compose file and the `stack.env` file through the Docker API and shows them read only, instead of an error. The same works for other tools that keep their stacks in a container. \"Move to /opt/stacks\" works for those stacks. It copies the compose...",
+  "version": "2.1.1",
+  "tag": "v2.1.1",
+  "asset": "docker-2.1.1.tar.gz",
+  "upstreamSha256": "a4db586cc07efcd26c64c7d7206b1b1a81945987731351939ba84db524558ff1",
+  "notes": "The plugin has a logo: the Docker logo is shown instead of the generic icon in the rail, Plugins and Browse (consoles newer than 0.4.0; older ones keep the icon).",
   "manifest": {
     "name": "Docker",
     "author": "Ervisio team",
