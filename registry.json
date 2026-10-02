@@ -11,6 +11,7 @@
   "plugins": [
     {"id": "docker", "repo": "Ervisio/plugin-docker", "trust": "team", "category": "Containers", "featured": true},
     {"id": "caddy", "repo": "Ervisio/plugin-caddy", "trust": "team", "category": "Web servers"},
-    {"id": "minecraft", "repo": "Ervisio/plugin-minecraft", "trust": "team", "category": "Games"}
+    {"id": "minecraft", "repo": "Ervisio/plugin-minecraft", "trust": "team", "category": "Games"},
+    {"id": "firewall", "repo": "Ervisio/plugin-firewall", "trust": "team", "category": "Security"}
   ]
 }
