@@ -71,7 +71,11 @@ sync_one() {
   done < "$WORK/labels-$id"
   local title="Update $id to $version"
   [ -n "$current" ] || title="Add $id $version"
-  gh pr create --repo "$REGISTRY_REPO" --base main --head "$branch" --title "$title" --body-file "$WORK/body-$id.md" "${labels[@]}"
+  if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then cat "$WORK/body-$id.md" >> "$GITHUB_STEP_SUMMARY"; fi
+  if ! gh pr create --repo "$REGISTRY_REPO" --base main --head "$branch" --title "$title" --body-file "$WORK/body-$id.md" "${labels[@]}"; then
+    git checkout -q main
+    die "branch $branch was pushed but the pull request could not be opened. If GitHub says Actions may not create pull requests, allow it in the organization and repository settings (Actions > General > Workflow permissions), or open it by hand: gh pr create --repo $REGISTRY_REPO --head $branch (the summary is in the job summary)"
+  fi
   git checkout -q main
 }
 

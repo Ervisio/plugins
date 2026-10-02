@@ -14,7 +14,7 @@ set -euo pipefail
 cd "$ROOT"
 
 SITE="${1:?usage: publish.sh SITE_DIR}"
-[ -n "${KEY_FILE:-}" ] && [ -s "$KEY_FILE" ] || die "KEY_FILE is not set or empty (the PLUGIN_SIGNING_KEY secret; see README)"
+if [ -z "${KEY_FILE:-}" ] || [ ! -s "$KEY_FILE" ]; then die "KEY_FILE is not set or empty (the PLUGIN_SIGNING_KEY secret; see README)"; fi
 TEAM_PUB_FILE="${TEAM_PUB_FILE:-$ROOT/team.pub}"
 SIGNED="$WORK/signed"
 mkdir -p "$SITE" "$SIGNED"
