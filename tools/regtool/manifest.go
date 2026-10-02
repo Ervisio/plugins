@@ -45,6 +45,10 @@ func readManifest(dir string) (*pluginManifest, error) {
 		Name: str("name"), Author: str("author"), Description: str("description"), Homepage: str("homepage"),
 		Icon: str("icon"), Color: str("color"), Entry: str("entry"),
 		Capabilities: obj("capabilities"), Contributes: obj("contributes"), VisibleTo: obj("visibleTo"),
+		MinCore: str("minCore"),
+	}
+	if v, ok := raw["requires"]; ok && !bytes.Equal(bytes.TrimSpace(v), []byte("null")) {
+		m.Reviewed.Requires = compact(v)
 	}
 	return m, nil
 }
@@ -78,6 +82,7 @@ func compareReviewed(e *Entry, m *pluginManifest) []string {
 	for _, f := range [][3]string{
 		{"name", r.Name, got.Name}, {"author", r.Author, got.Author}, {"description", r.Description, got.Description},
 		{"homepage", r.Homepage, got.Homepage}, {"icon", r.Icon, got.Icon}, {"color", r.Color, got.Color}, {"entry", r.Entry, got.Entry},
+		{"minCore", r.MinCore, got.MinCore},
 	} {
 		if f[1] != f[2] {
 			d = append(d, fmt.Sprintf("%s is %q, the entry says %q", f[0], f[2], f[1]))
@@ -86,7 +91,10 @@ func compareReviewed(e *Entry, m *pluginManifest) []string {
 	for _, f := range []struct {
 		name      string
 		want, got json.RawMessage
-	}{{"capabilities", r.Capabilities, got.Capabilities}, {"contributes", r.Contributes, got.Contributes}, {"visibleTo", r.VisibleTo, got.VisibleTo}} {
+	}{{"capabilities", r.Capabilities, got.Capabilities}, {"contributes", r.Contributes, got.Contributes}, {"visibleTo", r.VisibleTo, got.VisibleTo}, {"requires", r.Requires, got.Requires}} {
+		if len(f.want) == 0 && len(f.got) == 0 {
+			continue
+		}
 		if !sameJSON(f.want, f.got) {
 			d = append(d, f.name+" differ from the reviewed entry")
 		}

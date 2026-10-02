@@ -120,6 +120,8 @@ type CatalogEntry struct {
 	Installs     int             `json:"installs"`
 	Featured     bool            `json:"featured,omitempty"`
 	Notes        string          `json:"notes,omitempty"`
+	MinCore      string          `json:"minCore,omitempty"`
+	Requires     json.RawMessage `json:"requires,omitempty"`
 	Source       string          `json:"source"`
 	SHA256       string          `json:"sha256"`
 	Capabilities json.RawMessage `json:"capabilities"`
@@ -179,7 +181,7 @@ func buildCatalog(root, signedDir string, now time.Time) (*CatalogFile, error) {
 		c.Plugins = append(c.Plugins, CatalogEntry{
 			ID: src.ID, Name: m.Reviewed.Name, Version: e.Version, Author: m.Reviewed.Author, Description: m.Reviewed.Description,
 			Icon: m.Reviewed.Icon, Logo: logo, Color: m.Reviewed.Color, Category: src.Category, Verified: true, Featured: src.Featured,
-			Notes: e.Notes, Source: SignedBase + src.ID + "-" + e.Version + "/" + name, SHA256: sum,
+			Notes: e.Notes, MinCore: m.Reviewed.MinCore, Requires: m.Reviewed.Requires, Source: SignedBase + src.ID + "-" + e.Version + "/" + name, SHA256: sum,
 			Capabilities: m.Reviewed.Capabilities, Contributes: m.Reviewed.Contributes, VisibleTo: m.Reviewed.VisibleTo,
 			Homepage: m.Reviewed.Homepage, Repo: src.Repo, Trust: src.Trust,
 		})

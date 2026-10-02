@@ -36,6 +36,7 @@ type capsDoc struct {
 		AdminUnlessGroup string `json:"adminUnlessGroup"`
 		Pty              bool   `json:"pty"`
 		TimeoutSec       int    `json:"timeoutSec"`
+		Remote           string `json:"remote"`
 	} `json:"commands"`
 	HTTP []struct {
 		Name             string   `json:"name"`
@@ -43,6 +44,7 @@ type capsDoc struct {
 		Admin            bool     `json:"admin"`
 		AdminUnlessGroup string   `json:"adminUnlessGroup"`
 		Headers          []string `json:"headers"`
+		Remote           string   `json:"remote"`
 		Rules            []struct {
 			Methods []string `json:"methods"`
 			Path    string   `json:"path"`
@@ -52,8 +54,26 @@ type capsDoc struct {
 		Read  []json.RawMessage `json:"read"`
 		Write []json.RawMessage `json:"write"`
 	} `json:"files"`
-	Sockets []string `json:"sockets"`
-	Network []string `json:"network"`
+	Sockets   []string `json:"sockets"`
+	Network   []string `json:"network"`
+	UserHosts bool     `json:"userHosts"`
+	Notify    bool     `json:"notify"`
+	Jobs      []struct {
+		Name  string `json:"name"`
+		Steps []struct {
+			ID      string `json:"id"`
+			Command string `json:"command"`
+			HTTP    *struct {
+				API    string `json:"api"`
+				Method string `json:"method"`
+				Path   string `json:"path"`
+			} `json:"http"`
+			Notify json.RawMessage `json:"notify"`
+		} `json:"steps"`
+		Webhook *struct {
+			Params []string `json:"params"`
+		} `json:"webhook"`
+	} `json:"jobs"`
 }
 
 type folder struct {
@@ -111,6 +131,9 @@ func permissions(caps, visible json.RawMessage) ([]permItem, error) {
 			}
 			pats = append(pats, p)
 		}
+		if cmd.Remote != "" {
+			risks = append(risks, "can target remote "+cmd.Remote+" environments")
+		}
 		text := fmt.Sprintf("%s `%s`: runs `%s`%s", kind, cmd.Name, strings.Join(cmd.Argv, " "), as)
 		if len(pats) > 0 {
 			text += "; arguments " + strings.Join(pats, ", ")
@@ -121,6 +144,9 @@ func permissions(caps, visible json.RawMessage) ([]permItem, error) {
 		as, risks := adminText(h.Admin, h.AdminUnlessGroup)
 		if isDockerSocket(h.Socket) {
 			risks = append(risks, "Docker API: equivalent to root")
+		}
+		if h.Remote != "" {
+			risks = append(risks, "can target remote "+h.Remote+" environments")
 		}
 		text := fmt.Sprintf("HTTP API `%s` on socket `%s`%s", h.Name, h.Socket, as)
 		if len(h.Headers) > 0 {
@@ -169,6 +195,34 @@ func permissions(caps, visible json.RawMessage) ([]permItem, error) {
 	}
 	for _, n := range c.Network {
 		out = append(out, permItem{Key: "network:" + n, Text: fmt.Sprintf("The plugin page may connect to `%s` over https/wss", n), Risks: []string{"network"}})
+	}
+	if c.UserHosts {
+		out = append(out, permItem{Key: "network:userHosts", Text: "The plugin may ask an administrator to approve more hosts", Risks: []string{"network"}})
+	}
+	if c.Notify {
+		out = append(out, permItem{Key: "notify", Text: "Sends notifications through the console's channels (email, Telegram, webhooks…)"})
+	}
+	for _, j := range c.Jobs {
+		var steps []string
+		for _, st := range j.Steps {
+			switch {
+			case st.Command != "":
+				steps = append(steps, "`"+st.Command+"`")
+			case st.HTTP != nil:
+				steps = append(steps, fmt.Sprintf("`%s` %s `%s`", st.HTTP.API, st.HTTP.Method, st.HTTP.Path))
+			case len(st.Notify) > 0:
+				steps = append(steps, "notify")
+			}
+		}
+		risks := []string{"runs in the background"}
+		text := fmt.Sprintf("Background job `%s`: %s", j.Name, strings.Join(steps, ", "))
+		if j.Webhook != nil {
+			risks = append(risks, "webhook without sign-in")
+			if len(j.Webhook.Params) > 0 {
+				text += "; a webhook call may set " + strings.Join(j.Webhook.Params, ", ")
+			}
+		}
+		out = append(out, permItem{Key: "job:" + j.Name, Text: text, Risks: risks})
 	}
 	var v struct {
 		Groups []string `json:"groups"`
