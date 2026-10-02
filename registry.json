@@ -5,7 +5,8 @@
     {"id": "Networking", "name": "Networking", "icon": "globe", "color": "term"},
     {"id": "Storage", "name": "Storage", "icon": "disk", "color": "sw"},
     {"id": "Monitoring", "name": "Monitoring", "icon": "zap", "color": "ov"},
-    {"id": "Web servers", "name": "Web servers", "icon": "globe", "color": "log"}
+    {"id": "Web servers", "name": "Web servers", "icon": "globe", "color": "log"},
+    {"id": "Games", "name": "Games", "icon": "play", "color": "term"}
   ],
   "plugins": [
     {"id": "docker", "repo": "Ervisio/plugin-docker", "trust": "team", "category": "Containers", "featured": true},
