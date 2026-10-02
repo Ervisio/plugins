@@ -1,0 +1,1363 @@
+{
+  "id": "firewall",
+  "repo": "Ervisio/plugin-firewall",
+  "version": "0.1.0",
+  "tag": "v0.1.0",
+  "asset": "firewall-0.1.0.tar.gz",
+  "upstreamSha256": "30dba05c5b2e21dde17b71b510354b566478c885e8dafb53fb620356d34449f9",
+  "notes": "First release. ufw, firewalld, nftables and iptables: rules, default policies, zones, chains, saving across reboots. Firewall logs from the kernel journal or a syslog file, with live view, counts and \"Block\" on any address. fail2ban jails: ban and unban. SSH guard, typed confirmation, command preview. Background check with notifications (job `watchdog`). Dashboard widget. English and Italian.",
+  "manifest": {
+    "name": "Firewall",
+    "author": "Ervisio team",
+    "description": "Manage ufw, firewalld, nftables and iptables from Ervisio: rules, zones, default policies, firewall logs and fail2ban bans, with a guard that keeps SSH open.",
+    "homepage": "https://github.com/Ervisio/plugin-firewall",
+    "icon": "shield",
+    "color": "usr",
+    "entry": "index.js",
+    "capabilities": {
+      "commands": [
+        {
+          "name": "detect",
+          "description": "Find which firewalls are installed and running",
+          "argv": [
+            "sh",
+            "-c",
+            "for c in ufw firewall-cmd nft iptables ip6tables fail2ban-client ss; do p=$(command -v \"$c\" 2>/dev/null) || p=; echo \"bin|$c|$p\"; done\niptables --version 2>/dev/null | head -1 | sed \"s/^/ver|iptables|/\"\nnft --version 2>/dev/null | head -1 | sed \"s/^/ver|nft|/\"\nfirewall-cmd --version 2>/dev/null | head -1 | sed \"s/^/ver|firewalld|/\"\nfail2ban-client --version 2>/dev/null | head -1 | sed \"s/^/ver|fail2ban|/\"\nfor u in ufw firewalld nftables fail2ban netfilter-persistent iptables; do echo \"unit|$u|$(systemctl is-active \"$u\" 2>/dev/null)|$(systemctl is-enabled \"$u\" 2>/dev/null)\"; done\n[ -r /etc/ufw/ufw.conf ] && grep -E \"^ENABLED=\" /etc/ufw/ufw.conf | sed \"s/^/ufwconf|/\"\necho \"tz|$(date +%z)\"\nexit 0"
+          ]
+        },
+        {
+          "name": "listening",
+          "description": "List the ports that programs listen on (ss)",
+          "argv": [
+            "ss",
+            "-Htulnp"
+          ],
+          "admin": true
+        },
+        {
+          "name": "state",
+          "description": "Tell whether a firewall is active (used by the watchdog job)",
+          "argv": [
+            "sh",
+            "-c",
+            "case \"$1\" in\n  ufw) LC_ALL=C ufw status | head -1 | grep -q 'Status: active' && s=active || s=inactive;;\n  firewalld) firewall-cmd --state >/dev/null 2>&1 && s=active || s=inactive;;\n  nftables) nft list ruleset 2>/dev/null | grep -q 'hook input' && s=active || s=inactive;;\n  iptables) [ \"$(iptables -S INPUT 2>/dev/null | wc -l)\" -gt 1 ] || iptables -S INPUT 2>/dev/null | grep -q '^-P INPUT DROP' && s=active || s=inactive;;\n  fail2ban) fail2ban-client ping >/dev/null 2>&1 && s=active || s=inactive;;\nesac\necho \"$s\"",
+            "sh",
+            "{0}"
+          ],
+          "args": [
+            {
+              "pattern": "ufw|firewalld|nftables|iptables|fail2ban",
+              "maxLen": 9
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "ufw-status",
+          "description": "Read ufw status, rules and settings",
+          "argv": [
+            "sh",
+            "-c",
+            "export LC_ALL=C\necho @@VERSION; ufw version 2>/dev/null | head -1\necho @@VERBOSE; ufw status verbose\necho @@NUMBERED; ufw status numbered\necho @@ADDED; ufw show added\necho @@CONF; grep -hE \"^(ENABLED|LOGLEVEL|IPV6|DEFAULT_(INPUT|OUTPUT|FORWARD)_POLICY)=\" /etc/ufw/ufw.conf /etc/default/ufw 2>/dev/null\nexit 0"
+          ],
+          "admin": true
+        },
+        {
+          "name": "ufw-enable",
+          "description": "Turn ufw on",
+          "argv": [
+            "ufw",
+            "--force",
+            "enable"
+          ],
+          "admin": true
+        },
+        {
+          "name": "ufw-disable",
+          "description": "Turn ufw off",
+          "argv": [
+            "ufw",
+            "disable"
+          ],
+          "admin": true
+        },
+        {
+          "name": "ufw-reload",
+          "description": "Reload ufw",
+          "argv": [
+            "ufw",
+            "reload"
+          ],
+          "admin": true
+        },
+        {
+          "name": "ufw-default",
+          "description": "Set a default ufw policy",
+          "argv": [
+            "ufw",
+            "default",
+            "{0}",
+            "{1}"
+          ],
+          "args": [
+            {
+              "pattern": "allow|deny|reject",
+              "maxLen": 6
+            },
+            {
+              "pattern": "incoming|outgoing|routed",
+              "maxLen": 8
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "ufw-logging",
+          "description": "Set the ufw log level",
+          "argv": [
+            "ufw",
+            "logging",
+            "{0}"
+          ],
+          "args": [
+            {
+              "pattern": "off|on|low|medium|high|full",
+              "maxLen": 6
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "ufw-delete",
+          "description": "Delete a ufw rule by number",
+          "argv": [
+            "ufw",
+            "--force",
+            "delete",
+            "{0}"
+          ],
+          "args": [
+            {
+              "pattern": "[1-9][0-9]{0,3}",
+              "maxLen": 4
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "ufw-apps",
+          "description": "List ufw application profiles",
+          "argv": [
+            "ufw",
+            "app",
+            "list"
+          ],
+          "admin": true
+        },
+        {
+          "name": "ufw-port",
+          "description": "Add a ufw rule for a port and protocol",
+          "argv": [
+            "ufw",
+            "{0}",
+            "{1}",
+            "proto",
+            "{2}",
+            "from",
+            "{3}",
+            "to",
+            "{4}",
+            "port",
+            "{5}",
+            "comment",
+            "{6}"
+          ],
+          "args": [
+            {
+              "pattern": "allow|deny|reject|limit",
+              "maxLen": 6
+            },
+            {
+              "pattern": "in|out",
+              "maxLen": 3
+            },
+            {
+              "pattern": "tcp|udp",
+              "maxLen": 3
+            },
+            {
+              "pattern": "any|[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            },
+            {
+              "pattern": "any|[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            },
+            {
+              "pattern": "[0-9]{1,5}(:[0-9]{1,5})?(,[0-9]{1,5}(:[0-9]{1,5})?){0,14}",
+              "maxLen": 120
+            },
+            {
+              "pattern": "[\\p{L}\\p{N}][\\p{L}\\p{N} _.,:/@()+-]{0,63}",
+              "maxLen": 256
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "ufw-port-any",
+          "description": "Add a ufw rule for a port, TCP and UDP",
+          "argv": [
+            "ufw",
+            "{0}",
+            "{1}",
+            "from",
+            "{2}",
+            "to",
+            "{3}",
+            "port",
+            "{4}",
+            "comment",
+            "{5}"
+          ],
+          "args": [
+            {
+              "pattern": "allow|deny|reject|limit",
+              "maxLen": 6
+            },
+            {
+              "pattern": "in|out",
+              "maxLen": 3
+            },
+            {
+              "pattern": "any|[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            },
+            {
+              "pattern": "any|[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            },
+            {
+              "pattern": "[0-9]{1,5}(:[0-9]{1,5})?(,[0-9]{1,5}(:[0-9]{1,5})?){0,14}",
+              "maxLen": 120
+            },
+            {
+              "pattern": "[\\p{L}\\p{N}][\\p{L}\\p{N} _.,:/@()+-]{0,63}",
+              "maxLen": 256
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "ufw-host",
+          "description": "Add a ufw rule for addresses only",
+          "argv": [
+            "ufw",
+            "{0}",
+            "{1}",
+            "from",
+            "{2}",
+            "to",
+            "{3}",
+            "comment",
+            "{4}"
+          ],
+          "args": [
+            {
+              "pattern": "allow|deny|reject|limit",
+              "maxLen": 6
+            },
+            {
+              "pattern": "in|out",
+              "maxLen": 3
+            },
+            {
+              "pattern": "any|[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            },
+            {
+              "pattern": "any|[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            },
+            {
+              "pattern": "[\\p{L}\\p{N}][\\p{L}\\p{N} _.,:/@()+-]{0,63}",
+              "maxLen": 256
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "ufw-app",
+          "description": "Add a ufw rule for an application profile",
+          "argv": [
+            "ufw",
+            "{0}",
+            "{1}",
+            "from",
+            "{2}",
+            "to",
+            "{3}",
+            "app",
+            "{4}",
+            "comment",
+            "{5}"
+          ],
+          "args": [
+            {
+              "pattern": "allow|deny|reject|limit",
+              "maxLen": 6
+            },
+            {
+              "pattern": "in|out",
+              "maxLen": 3
+            },
+            {
+              "pattern": "any|[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            },
+            {
+              "pattern": "any|[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            },
+            {
+              "pattern": "[A-Za-z0-9][A-Za-z0-9 ._()+-]{0,63}",
+              "maxLen": 64
+            },
+            {
+              "pattern": "[\\p{L}\\p{N}][\\p{L}\\p{N} _.,:/@()+-]{0,63}",
+              "maxLen": 256
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "ufw-port-if",
+          "description": "Add a ufw rule for a port on one interface",
+          "argv": [
+            "ufw",
+            "{0}",
+            "{1}",
+            "on",
+            "{2}",
+            "proto",
+            "{3}",
+            "from",
+            "{4}",
+            "to",
+            "{5}",
+            "port",
+            "{6}",
+            "comment",
+            "{7}"
+          ],
+          "args": [
+            {
+              "pattern": "allow|deny|reject|limit",
+              "maxLen": 6
+            },
+            {
+              "pattern": "in|out",
+              "maxLen": 3
+            },
+            {
+              "pattern": "[a-zA-Z0-9][a-zA-Z0-9_.@-]{0,14}",
+              "maxLen": 15
+            },
+            {
+              "pattern": "tcp|udp",
+              "maxLen": 3
+            },
+            {
+              "pattern": "any|[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            },
+            {
+              "pattern": "any|[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            },
+            {
+              "pattern": "[0-9]{1,5}(:[0-9]{1,5})?(,[0-9]{1,5}(:[0-9]{1,5})?){0,14}",
+              "maxLen": 120
+            },
+            {
+              "pattern": "[\\p{L}\\p{N}][\\p{L}\\p{N} _.,:/@()+-]{0,63}",
+              "maxLen": 256
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "ufw-host-if",
+          "description": "Add a ufw rule for addresses on one interface",
+          "argv": [
+            "ufw",
+            "{0}",
+            "{1}",
+            "on",
+            "{2}",
+            "from",
+            "{3}",
+            "to",
+            "{4}",
+            "comment",
+            "{5}"
+          ],
+          "args": [
+            {
+              "pattern": "allow|deny|reject|limit",
+              "maxLen": 6
+            },
+            {
+              "pattern": "in|out",
+              "maxLen": 3
+            },
+            {
+              "pattern": "[a-zA-Z0-9][a-zA-Z0-9_.@-]{0,14}",
+              "maxLen": 15
+            },
+            {
+              "pattern": "any|[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            },
+            {
+              "pattern": "any|[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            },
+            {
+              "pattern": "[\\p{L}\\p{N}][\\p{L}\\p{N} _.,:/@()+-]{0,63}",
+              "maxLen": 256
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "ufw-first-host",
+          "description": "Add a ufw rule for addresses before all others",
+          "argv": [
+            "ufw",
+            "prepend",
+            "{0}",
+            "{1}",
+            "from",
+            "{2}",
+            "to",
+            "{3}",
+            "comment",
+            "{4}"
+          ],
+          "args": [
+            {
+              "pattern": "allow|deny|reject|limit",
+              "maxLen": 6
+            },
+            {
+              "pattern": "in|out",
+              "maxLen": 3
+            },
+            {
+              "pattern": "any|[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            },
+            {
+              "pattern": "any|[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            },
+            {
+              "pattern": "[\\p{L}\\p{N}][\\p{L}\\p{N} _.,:/@()+-]{0,63}",
+              "maxLen": 256
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "ufw-first-port",
+          "description": "Add a ufw rule for a port before all others",
+          "argv": [
+            "ufw",
+            "prepend",
+            "{0}",
+            "{1}",
+            "proto",
+            "{2}",
+            "from",
+            "{3}",
+            "to",
+            "{4}",
+            "port",
+            "{5}",
+            "comment",
+            "{6}"
+          ],
+          "args": [
+            {
+              "pattern": "allow|deny|reject|limit",
+              "maxLen": 6
+            },
+            {
+              "pattern": "in|out",
+              "maxLen": 3
+            },
+            {
+              "pattern": "tcp|udp",
+              "maxLen": 3
+            },
+            {
+              "pattern": "any|[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            },
+            {
+              "pattern": "any|[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            },
+            {
+              "pattern": "[0-9]{1,5}(:[0-9]{1,5})?(,[0-9]{1,5}(:[0-9]{1,5})?){0,14}",
+              "maxLen": 120
+            },
+            {
+              "pattern": "[\\p{L}\\p{N}][\\p{L}\\p{N} _.,:/@()+-]{0,63}",
+              "maxLen": 256
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "fwd-info",
+          "description": "Read firewalld state, zones and services",
+          "argv": [
+            "sh",
+            "-c",
+            "P=; [ \"$1\" = permanent ] && P=--permanent\necho @@STATE; firewall-cmd --state 2>&1\necho @@VERSION; firewall-cmd --version 2>&1\necho @@DEFAULT; firewall-cmd --get-default-zone 2>&1\necho @@ACTIVE; firewall-cmd --get-active-zones 2>&1\necho @@LOGDENIED; firewall-cmd --get-log-denied 2>&1\necho @@SERVICES; firewall-cmd $P --get-services 2>&1\necho @@ZONES; firewall-cmd $P --list-all-zones 2>&1\nexit 0",
+            "sh",
+            "{0}"
+          ],
+          "args": [
+            {
+              "pattern": "runtime|permanent",
+              "maxLen": 9
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "fwd-change",
+          "description": "Add or remove a service, port, source, interface or masquerading in a firewalld zone",
+          "argv": [
+            "firewall-cmd",
+            "{0}",
+            "--zone={1}",
+            "{2}"
+          ],
+          "args": [
+            {
+              "pattern": "--permanent|--quiet",
+              "maxLen": 11,
+              "allowDash": true
+            },
+            {
+              "pattern": "[A-Za-z0-9][A-Za-z0-9_-]{0,31}",
+              "maxLen": 32
+            },
+            {
+              "pattern": "--(add|remove)-(service=[a-zA-Z0-9][a-zA-Z0-9_.+-]{0,63}|port=[0-9]{1,5}(-[0-9]{1,5})?/(tcp|udp|sctp|dccp)|source=[0-9a-fA-F.:/]{2,49}|interface=[a-zA-Z0-9][a-zA-Z0-9_.@-]{0,14}|masquerade)",
+              "maxLen": 96,
+              "allowDash": true
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "fwd-rich",
+          "description": "Add or remove a firewalld rich rule",
+          "argv": [
+            "firewall-cmd",
+            "{0}",
+            "--zone={1}",
+            "{2}"
+          ],
+          "args": [
+            {
+              "pattern": "--permanent|--quiet",
+              "maxLen": 11,
+              "allowDash": true
+            },
+            {
+              "pattern": "[A-Za-z0-9][A-Za-z0-9_-]{0,31}",
+              "maxLen": 32
+            },
+            {
+              "pattern": "--(add|remove)-rich-rule=rule [A-Za-z0-9 =\"./:_,-]{1,480}",
+              "maxLen": 520,
+              "allowDash": true
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "fwd-forward",
+          "description": "Add or remove a firewalld port forward",
+          "argv": [
+            "firewall-cmd",
+            "{0}",
+            "--zone={1}",
+            "{2}"
+          ],
+          "args": [
+            {
+              "pattern": "--permanent|--quiet",
+              "maxLen": 11,
+              "allowDash": true
+            },
+            {
+              "pattern": "[A-Za-z0-9][A-Za-z0-9_-]{0,31}",
+              "maxLen": 32
+            },
+            {
+              "pattern": "--(add|remove)-forward-port=port=[0-9]{1,5}(-[0-9]{1,5})?:proto=(tcp|udp|sctp|dccp)(:toport=[0-9]{1,5}(-[0-9]{1,5})?)?(:toaddr=[0-9a-fA-F.:]{2,39})?",
+              "maxLen": 120,
+              "allowDash": true
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "fwd-default-zone",
+          "description": "Set the firewalld default zone",
+          "argv": [
+            "firewall-cmd",
+            "--set-default-zone={0}"
+          ],
+          "args": [
+            {
+              "pattern": "[A-Za-z0-9][A-Za-z0-9_-]{0,31}",
+              "maxLen": 32
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "fwd-reload",
+          "description": "Reload firewalld",
+          "argv": [
+            "firewall-cmd",
+            "--reload"
+          ],
+          "admin": true
+        },
+        {
+          "name": "fwd-persist",
+          "description": "Save the firewalld runtime configuration as permanent",
+          "argv": [
+            "firewall-cmd",
+            "--runtime-to-permanent"
+          ],
+          "admin": true
+        },
+        {
+          "name": "fwd-log-denied",
+          "description": "Set which denied packets firewalld logs",
+          "argv": [
+            "firewall-cmd",
+            "--set-log-denied={0}"
+          ],
+          "args": [
+            {
+              "pattern": "all|unicast|broadcast|multicast|off",
+              "maxLen": 9
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "nft-list",
+          "description": "Read the nftables ruleset with rule handles",
+          "argv": [
+            "nft",
+            "-a",
+            "list",
+            "ruleset"
+          ],
+          "admin": true
+        },
+        {
+          "name": "nft-rule",
+          "description": "Add or insert an nftables rule",
+          "argv": [
+            "nft",
+            "{0}",
+            "rule",
+            "{1}",
+            "{2}",
+            "{3}",
+            "{4}"
+          ],
+          "args": [
+            {
+              "pattern": "add|insert",
+              "maxLen": 6
+            },
+            {
+              "pattern": "ip|ip6|inet|arp|bridge|netdev",
+              "maxLen": 6
+            },
+            {
+              "pattern": "[A-Za-z_][A-Za-z0-9_.-]{0,63}",
+              "maxLen": 64
+            },
+            {
+              "pattern": "[A-Za-z_][A-Za-z0-9_.-]{0,63}",
+              "maxLen": 64
+            },
+            {
+              "pattern": "[A-Za-z0-9][A-Za-z0-9 .:/,{}_\"@!=<>*+-]{0,399}",
+              "maxLen": 400
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "nft-delete-rule",
+          "description": "Delete an nftables rule by handle",
+          "argv": [
+            "nft",
+            "delete",
+            "rule",
+            "{0}",
+            "{1}",
+            "{2}",
+            "handle",
+            "{3}"
+          ],
+          "args": [
+            {
+              "pattern": "ip|ip6|inet|arp|bridge|netdev",
+              "maxLen": 6
+            },
+            {
+              "pattern": "[A-Za-z_][A-Za-z0-9_.-]{0,63}",
+              "maxLen": 64
+            },
+            {
+              "pattern": "[A-Za-z_][A-Za-z0-9_.-]{0,63}",
+              "maxLen": 64
+            },
+            {
+              "pattern": "[0-9]{1,9}",
+              "maxLen": 9
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "nft-table",
+          "description": "Add, flush or delete an nftables table",
+          "argv": [
+            "nft",
+            "{0}",
+            "table",
+            "{1}",
+            "{2}"
+          ],
+          "args": [
+            {
+              "pattern": "add|flush|delete",
+              "maxLen": 6
+            },
+            {
+              "pattern": "ip|ip6|inet|arp|bridge|netdev",
+              "maxLen": 6
+            },
+            {
+              "pattern": "[A-Za-z_][A-Za-z0-9_.-]{0,63}",
+              "maxLen": 64
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "nft-chain",
+          "description": "Add, flush or delete a regular nftables chain",
+          "argv": [
+            "nft",
+            "{0}",
+            "chain",
+            "{1}",
+            "{2}",
+            "{3}"
+          ],
+          "args": [
+            {
+              "pattern": "add|flush|delete",
+              "maxLen": 6
+            },
+            {
+              "pattern": "ip|ip6|inet|arp|bridge|netdev",
+              "maxLen": 6
+            },
+            {
+              "pattern": "[A-Za-z_][A-Za-z0-9_.-]{0,63}",
+              "maxLen": 64
+            },
+            {
+              "pattern": "[A-Za-z_][A-Za-z0-9_.-]{0,63}",
+              "maxLen": 64
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "nft-base-chain",
+          "description": "Add an nftables base chain attached to a hook",
+          "argv": [
+            "nft",
+            "add",
+            "chain",
+            "{0}",
+            "{1}",
+            "{2}",
+            "{",
+            "type",
+            "{3}",
+            "hook",
+            "{4}",
+            "priority",
+            "{5}",
+            ";",
+            "policy",
+            "{6}",
+            ";",
+            "}"
+          ],
+          "args": [
+            {
+              "pattern": "ip|ip6|inet|arp|bridge|netdev",
+              "maxLen": 6
+            },
+            {
+              "pattern": "[A-Za-z_][A-Za-z0-9_.-]{0,63}",
+              "maxLen": 64
+            },
+            {
+              "pattern": "[A-Za-z_][A-Za-z0-9_.-]{0,63}",
+              "maxLen": 64
+            },
+            {
+              "pattern": "filter|nat|route",
+              "maxLen": 6
+            },
+            {
+              "pattern": "prerouting|input|forward|output|postrouting|ingress",
+              "maxLen": 11
+            },
+            {
+              "pattern": "-?[0-9]{1,4}|raw|mangle|dstnat|filter|security|srcnat",
+              "maxLen": 8,
+              "allowDash": true
+            },
+            {
+              "pattern": "accept|drop",
+              "maxLen": 6
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "nft-policy",
+          "description": "Set the policy of an nftables base chain",
+          "argv": [
+            "nft",
+            "chain",
+            "{0}",
+            "{1}",
+            "{2}",
+            "{",
+            "policy",
+            "{3}",
+            ";",
+            "}"
+          ],
+          "args": [
+            {
+              "pattern": "ip|ip6|inet|arp|bridge|netdev",
+              "maxLen": 6
+            },
+            {
+              "pattern": "[A-Za-z_][A-Za-z0-9_.-]{0,63}",
+              "maxLen": 64
+            },
+            {
+              "pattern": "[A-Za-z_][A-Za-z0-9_.-]{0,63}",
+              "maxLen": 64
+            },
+            {
+              "pattern": "accept|drop",
+              "maxLen": 6
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "nft-save",
+          "description": "Save the nftables ruleset to the file loaded at boot (keeps a .bak copy)",
+          "argv": [
+            "sh",
+            "-c",
+            "f=\"$1\"; t=\"$f.ervisio-tmp\"\n{ echo '#!/usr/sbin/nft -f'; echo 'flush ruleset'; echo; nft list ruleset; } > \"$t\" || { rm -f \"$t\"; exit 1; }\nchmod 0644 \"$t\"\n[ -e \"$f\" ] && cp -p \"$f\" \"$f.bak\"\nmv \"$t\" \"$f\" && echo \"$f\"",
+            "sh",
+            "{0}"
+          ],
+          "args": [
+            {
+              "pattern": "/etc/nftables\\.conf|/etc/sysconfig/nftables\\.conf",
+              "maxLen": 32
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "ipt-list",
+          "description": "Read an iptables table with rule numbers and counters",
+          "argv": [
+            "sh",
+            "-c",
+            "exec \"$0\" -w -t \"$1\" -L -n -v -x --line-numbers",
+            "{0}",
+            "{1}"
+          ],
+          "args": [
+            {
+              "pattern": "iptables|ip6tables",
+              "maxLen": 9
+            },
+            {
+              "pattern": "filter|nat|mangle|raw",
+              "maxLen": 6
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "ipt-port",
+          "description": "Insert an iptables rule for ports",
+          "argv": [
+            "sh",
+            "-c",
+            "exec \"$0\" \"$@\"",
+            "{0}",
+            "-w",
+            "-I",
+            "{1}",
+            "{2}",
+            "-p",
+            "{3}",
+            "-s",
+            "{4}",
+            "-d",
+            "{5}",
+            "-m",
+            "multiport",
+            "--dports",
+            "{6}",
+            "-m",
+            "comment",
+            "--comment",
+            "{7}",
+            "-j",
+            "{8}"
+          ],
+          "args": [
+            {
+              "pattern": "iptables|ip6tables",
+              "maxLen": 9
+            },
+            {
+              "pattern": "[A-Za-z][A-Za-z0-9_-]{0,28}",
+              "maxLen": 29
+            },
+            {
+              "pattern": "[1-9][0-9]{0,4}",
+              "maxLen": 5
+            },
+            {
+              "pattern": "tcp|udp",
+              "maxLen": 3
+            },
+            {
+              "pattern": "[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            },
+            {
+              "pattern": "[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            },
+            {
+              "pattern": "[0-9]{1,5}(:[0-9]{1,5})?(,[0-9]{1,5}(:[0-9]{1,5})?){0,14}",
+              "maxLen": 120
+            },
+            {
+              "pattern": "[\\p{L}\\p{N}][\\p{L}\\p{N} _.,:/@()+-]{0,63}",
+              "maxLen": 256
+            },
+            {
+              "pattern": "ACCEPT|DROP|REJECT|LOG|RETURN",
+              "maxLen": 6
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "ipt-host",
+          "description": "Insert an iptables rule for addresses and a protocol",
+          "argv": [
+            "sh",
+            "-c",
+            "exec \"$0\" \"$@\"",
+            "{0}",
+            "-w",
+            "-I",
+            "{1}",
+            "{2}",
+            "-p",
+            "{3}",
+            "-s",
+            "{4}",
+            "-d",
+            "{5}",
+            "-m",
+            "comment",
+            "--comment",
+            "{6}",
+            "-j",
+            "{7}"
+          ],
+          "args": [
+            {
+              "pattern": "iptables|ip6tables",
+              "maxLen": 9
+            },
+            {
+              "pattern": "[A-Za-z][A-Za-z0-9_-]{0,28}",
+              "maxLen": 29
+            },
+            {
+              "pattern": "[1-9][0-9]{0,4}",
+              "maxLen": 5
+            },
+            {
+              "pattern": "tcp|udp|icmp|ipv6-icmp|all",
+              "maxLen": 9
+            },
+            {
+              "pattern": "[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            },
+            {
+              "pattern": "[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            },
+            {
+              "pattern": "[\\p{L}\\p{N}][\\p{L}\\p{N} _.,:/@()+-]{0,63}",
+              "maxLen": 256
+            },
+            {
+              "pattern": "ACCEPT|DROP|REJECT|LOG|RETURN",
+              "maxLen": 6
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "ipt-delete",
+          "description": "Delete an iptables rule by number",
+          "argv": [
+            "sh",
+            "-c",
+            "exec \"$0\" -w -D \"$1\" \"$2\"",
+            "{0}",
+            "{1}",
+            "{2}"
+          ],
+          "args": [
+            {
+              "pattern": "iptables|ip6tables",
+              "maxLen": 9
+            },
+            {
+              "pattern": "[A-Za-z][A-Za-z0-9_-]{0,28}",
+              "maxLen": 29
+            },
+            {
+              "pattern": "[1-9][0-9]{0,4}",
+              "maxLen": 5
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "ipt-policy",
+          "description": "Set the policy of a built-in iptables chain",
+          "argv": [
+            "sh",
+            "-c",
+            "exec \"$0\" -w -P \"$1\" \"$2\"",
+            "{0}",
+            "{1}",
+            "{2}"
+          ],
+          "args": [
+            {
+              "pattern": "iptables|ip6tables",
+              "maxLen": 9
+            },
+            {
+              "pattern": "INPUT|FORWARD|OUTPUT",
+              "maxLen": 7
+            },
+            {
+              "pattern": "ACCEPT|DROP",
+              "maxLen": 6
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "ipt-save",
+          "description": "Save iptables rules to the file loaded at boot (keeps a .bak copy)",
+          "argv": [
+            "sh",
+            "-c",
+            "f=\"$1\"\ncase \"$f\" in *v6|*ip6tables) b=ip6tables-save;; *) b=iptables-save;; esac\nmkdir -p \"$(dirname \"$f\")\" || exit 1\n\"$b\" > \"$f.ervisio-tmp\" || { rm -f \"$f.ervisio-tmp\"; exit 1; }\n[ -e \"$f\" ] && cp -p \"$f\" \"$f.bak\"\nmv \"$f.ervisio-tmp\" \"$f\" && echo \"$f\"",
+            "sh",
+            "{0}"
+          ],
+          "args": [
+            {
+              "pattern": "/etc/iptables/rules\\.v[46]|/etc/sysconfig/ip6?tables",
+              "maxLen": 24
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "f2b-status",
+          "description": "Read fail2ban jails and banned addresses",
+          "argv": [
+            "sh",
+            "-c",
+            "fail2ban-client ping >/dev/null 2>&1 || { echo @@DOWN; exit 0; }\necho \"@@VERSION $(fail2ban-client --version 2>/dev/null | head -1)\"\njails=$(fail2ban-client status | sed -n \"s/.*Jail list:[[:space:]]*//p\" | tr \",\" \" \")\nfor j in $jails; do echo \"@@JAIL $j\"; fail2ban-client status \"$j\"; done\nexit 0"
+          ],
+          "admin": true
+        },
+        {
+          "name": "f2b-set",
+          "description": "Ban or unban an address in a fail2ban jail",
+          "argv": [
+            "fail2ban-client",
+            "set",
+            "{0}",
+            "{1}",
+            "{2}"
+          ],
+          "args": [
+            {
+              "pattern": "[A-Za-z0-9][A-Za-z0-9_.-]{0,63}",
+              "maxLen": 64
+            },
+            {
+              "pattern": "banip|unbanip",
+              "maxLen": 7
+            },
+            {
+              "pattern": "[0-9]{1,3}(\\.[0-9]{1,3}){3}(/[0-9]{1,2})?|[0-9a-fA-F:]*:[0-9a-fA-F:.]*(/[0-9]{1,3})?",
+              "maxLen": 49
+            }
+          ],
+          "admin": true
+        },
+        {
+          "name": "log-journal",
+          "description": "Read firewall lines from the kernel journal",
+          "argv": [
+            "journalctl",
+            "-k",
+            "--no-pager",
+            "-o",
+            "short-iso-precise",
+            "--since={0}",
+            "-n",
+            "{1}",
+            "{2}"
+          ],
+          "args": [
+            {
+              "pattern": "-[0-9]{1,4}(min|h|d)|today|yesterday|[0-9]{4}-[0-9]{2}-[0-9]{2}( [0-9]{2}:[0-9]{2}(:[0-9]{2})?)?",
+              "maxLen": 19,
+              "allowDash": true
+            },
+            {
+              "pattern": "[1-9][0-9]{0,4}",
+              "maxLen": 5
+            },
+            {
+              "pattern": "--grep=IN=\\.\\*OUT=|--no-hostname",
+              "maxLen": 16,
+              "allowDash": true
+            }
+          ],
+          "admin": true,
+          "adminUnlessGroup": "adm",
+          "timeoutSec": 60
+        },
+        {
+          "name": "log-journal-follow",
+          "description": "Follow firewall lines in the kernel journal",
+          "argv": [
+            "journalctl",
+            "-k",
+            "-f",
+            "-n",
+            "0",
+            "--no-pager",
+            "-o",
+            "short-iso-precise",
+            "{0}"
+          ],
+          "args": [
+            {
+              "pattern": "--grep=IN=\\.\\*OUT=|--no-hostname",
+              "maxLen": 16,
+              "allowDash": true
+            }
+          ],
+          "admin": true,
+          "adminUnlessGroup": "adm",
+          "timeoutSec": 600
+        },
+        {
+          "name": "log-file",
+          "description": "Read the last lines of a firewall log file",
+          "argv": [
+            "tail",
+            "-n",
+            "{0}",
+            "{1}"
+          ],
+          "args": [
+            {
+              "pattern": "[1-9][0-9]{0,4}",
+              "maxLen": 5
+            },
+            {
+              "pattern": "/var/log/(ufw\\.log|kern\\.log|messages|syslog|firewalld|fail2ban\\.log)(\\.1)?",
+              "maxLen": 40
+            }
+          ],
+          "admin": true,
+          "adminUnlessGroup": "adm",
+          "timeoutSec": 60
+        },
+        {
+          "name": "log-file-follow",
+          "description": "Follow a firewall log file",
+          "argv": [
+            "tail",
+            "-n",
+            "0",
+            "-F",
+            "{0}"
+          ],
+          "args": [
+            {
+              "pattern": "/var/log/(ufw\\.log|kern\\.log|messages|syslog|firewalld|fail2ban\\.log)(\\.1)?",
+              "maxLen": 40
+            }
+          ],
+          "admin": true,
+          "adminUnlessGroup": "adm",
+          "timeoutSec": 600
+        }
+      ],
+      "files": {
+        "write": [
+          {
+            "path": "~/.config/ervisio/plugins/firewall",
+            "create": true
+          }
+        ]
+      },
+      "notify": true,
+      "jobs": [
+        {
+          "name": "watchdog",
+          "description": "Check that a firewall is running and send a notification when its state changes.",
+          "timeoutSec": 60,
+          "params": [
+            {
+              "name": "backend",
+              "pattern": "ufw|firewalld|nftables|iptables|fail2ban",
+              "maxLen": 9,
+              "description": "ufw, firewalld, nftables, iptables or fail2ban"
+            }
+          ],
+          "steps": [
+            {
+              "id": "check",
+              "command": "state",
+              "args": [
+                "{param.backend}"
+              ]
+            },
+            {
+              "id": "tell",
+              "if": {
+                "step": "check",
+                "when": "changed"
+              },
+              "notify": {
+                "title": "Firewall {param.backend}: {step.check.stdout}",
+                "body": "The {param.backend} firewall is now {step.check.stdout} on this server.",
+                "level": "warn",
+                "link": "/p/firewall/firewall"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "contributes": {
+      "pages": [
+        {
+          "id": "firewall",
+          "title": "Firewall",
+          "icon": "shield"
+        }
+      ],
+      "widgets": [
+        {
+          "id": "status",
+          "title": "Firewall",
+          "icon": "shield"
+        }
+      ],
+      "snippets": [
+        {
+          "name": "ufw status",
+          "command": "sudo ufw status verbose"
+        },
+        {
+          "name": "firewalld zones",
+          "command": "sudo firewall-cmd --list-all-zones"
+        },
+        {
+          "name": "nftables ruleset",
+          "command": "sudo nft -a list ruleset"
+        },
+        {
+          "name": "Firewall log (live)",
+          "command": "sudo journalctl -k -f --grep='IN=.*OUT='"
+        }
+      ]
+    },
+    "visibleTo": {},
+    "minCore": "0.5.0"
+  }
+}
