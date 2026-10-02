@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  regtool:
+    name: regtool (gofmt, go vet, go test)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: tools/regtool
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: tools/regtool/go.mod
+          cache: false
+      - name: gofmt
+        run: |
+          out="$(gofmt -l .)"
+          if [ -n "$out" ]; then echo "Not gofmt'ed:"; echo "$out"; exit 1; fi
+      - run: go vet ./...
+      - run: go test ./...
+      - name: shellcheck
+        working-directory: .
+        run: shellcheck -x scripts/*.sh
+      - name: registry.json and plugins/*.json
+        working-directory: .
+        run: (cd tools/regtool && go run . check -root ../..)

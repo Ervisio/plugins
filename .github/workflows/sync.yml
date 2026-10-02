@@ -1,0 +1,47 @@
+# Looks for new releases of the plugins listed in registry.json and opens a
+# pull request per new version, with a summary of the permission changes.
+# The plugin repositories need no secret: this workflow pulls their public
+# releases with its own GITHUB_TOKEN.
+#
+# Pull requests opened with GITHUB_TOKEN do not start other workflows: this
+# job already validated the package; to run check.yml on such a pull
+# request, close and reopen it.
+name: Sync plugin releases
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      id:
+        description: 'Only this plugin id (empty: all)'
+        required: false
+        default: ''
+  repository_dispatch:
+    types: [plugin-release]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: tools/regtool/go.mod
+          cache: false
+      - name: Sync
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REGISTRY_REPO: ${{ github.repository }}
+          ONLY: ${{ github.event.inputs.id || github.event.client_payload.id || '' }}
+        run: ./scripts/sync.sh "$ONLY"

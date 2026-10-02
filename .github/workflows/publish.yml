@@ -1,0 +1,74 @@
+# Runs when a reviewed change reaches main: signs every plugin version that
+# has no signed release yet with the Ervisio team key (secret
+# PLUGIN_SIGNING_KEY), releases it here as <id>-<version>, regenerates and
+# signs catalog.json and publishes catalog.json + catalog.sig on GitHub Pages
+# (https://ervisio.github.io/plugins/).
+name: Publish
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - registry.json
+      - 'plugins/**'
+      - 'tools/**'
+      - 'scripts/**'
+      - CORE_REF
+      - team.pub
+      - .github/workflows/publish.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  sign:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: tools/regtool/go.mod
+          cache: false
+      - name: Sign, release and build the catalog
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REGISTRY_REPO: ${{ github.repository }}
+          PLUGIN_SIGNING_KEY: ${{ secrets.PLUGIN_SIGNING_KEY }}
+        run: |
+          if [ -z "$PLUGIN_SIGNING_KEY" ]; then
+            echo "::error::PLUGIN_SIGNING_KEY is not set; see README (Secrets)"; exit 1
+          fi
+          umask 077
+          KEY_FILE="$RUNNER_TEMP/team.key"
+          trap 'rm -f "$KEY_FILE"' EXIT
+          printf '%s\n' "$PLUGIN_SIGNING_KEY" > "$KEY_FILE"
+          unset PLUGIN_SIGNING_KEY
+          umask 022
+          KEY_FILE="$KEY_FILE" ./scripts/publish.sh "$RUNNER_TEMP/site"
+          rm -f "$KEY_FILE"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/site
+
+  deploy:
+    needs: sign
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - id: deployment
+        uses: actions/deploy-pages@v4

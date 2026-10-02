@@ -1,0 +1,32 @@
+# Pull request check: registry.json and plugins/*.json are valid, and every
+# changed plugins/<id>.json describes exactly the package it points to
+# (checksum, manifest validated with the core's rules, reviewed permissions).
+# Runs without secrets and with a read-only token.
+name: Check
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: tools/regtool/go.mod
+          cache: false
+      - name: Check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: ./scripts/check.sh
