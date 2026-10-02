@@ -60,6 +60,9 @@ type Reviewed struct {
 	Capabilities json.RawMessage `json:"capabilities"`
 	Contributes  json.RawMessage `json:"contributes"`
 	VisibleTo    json.RawMessage `json:"visibleTo"`
+	// MinCore and Requires say which Ervisio the plugin needs (core 0.5.0).
+	MinCore  string          `json:"minCore,omitempty"`
+	Requires json.RawMessage `json:"requires,omitempty"`
 }
 
 var (
