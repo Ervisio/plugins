@@ -1,11 +1,11 @@
 {
   "id": "caddy",
   "repo": "Ervisio/plugin-caddy",
-  "version": "1.0.0",
-  "tag": "v1.0.0",
-  "asset": "caddy-1.0.0.tar.gz",
-  "upstreamSha256": "481e29eacbde1ec963cbec41cceb0e1918a1c72c04ba708f69c315431e025714",
-  "notes": "First release. Manage Caddy from Ervisio, whether it runs as the system service (caddy.service) or in a Docker container: the plugin finds every Caddy on the machine and lets you switch between them. Sites: every site of the Caddyfile and the files it imports, with what answers it (container, port, folder, redirect), whether that backend answers, and the state of its HTTPS certificate. Add, edit, turn off and delete sites with a form (reverse proxy, static files, PHP, redirect; compression, s...",
+  "version": "1.0.1",
+  "tag": "v1.0.1",
+  "asset": "caddy-1.0.1.tar.gz",
+  "upstreamSha256": "c71aaa3f380eafaecb77f6a163f238294be857dc578ccfd6dcdbb28c21742d19",
+  "notes": "The plugin has a logo: the Caddy logo is shown instead of the generic icon in the rail, Plugins and Browse (consoles newer than 0.4.0; older ones keep the icon).",
   "manifest": {
     "name": "Caddy",
     "author": "Ervisio team",
