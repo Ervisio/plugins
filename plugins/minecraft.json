@@ -1,11 +1,11 @@
 {
   "id": "minecraft",
   "repo": "Ervisio/plugin-minecraft",
-  "version": "0.1.0",
-  "tag": "v0.1.0",
-  "asset": "minecraft-0.1.0.tar.gz",
-  "upstreamSha256": "cc3aad8ac576964acae0dadf690700f46b6935302356b48230be1aae33ae5049",
-  "notes": "Initial Minecraft Java server manager for Ervisio (plugin SDK contract 3). Approved layout (round 041, variant A): inner sidebar, server cards with live CPU/memory, status filters, details in a right drawer (bottom sheet on phones). Panels follow the plugin surface convention (`--sunk` panels, `--surface` items). Persistent native runtime (`ervisio-minecraft` service): several servers, console, chunked file transfers, text editor, `server.properties` editor with structured fields, Vanilla/Pap...",
+  "version": "0.1.1",
+  "tag": "v0.1.1",
+  "asset": "minecraft-0.1.1.tar.gz",
+  "upstreamSha256": "013a96c8b9ad8377a47ee9e60aa4a2301186d1b5dc90161ef3d6adf9af5043f1",
+  "notes": "The logo is now the Minecraft grass block, the game's own icon (vector version from Wikimedia Commons, public domain; Minecraft is a trademark of Mojang).",
   "manifest": {
     "name": "Minecraft",
     "author": "Ervisio team",
