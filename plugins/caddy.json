@@ -1,0 +1,415 @@
+{
+  "id": "caddy",
+  "repo": "Ervisio/plugin-caddy",
+  "version": "1.0.0",
+  "tag": "v1.0.0",
+  "asset": "caddy-1.0.0.tar.gz",
+  "upstreamSha256": "481e29eacbde1ec963cbec41cceb0e1918a1c72c04ba708f69c315431e025714",
+  "notes": "First release. Manage Caddy from Ervisio, whether it runs as the system service (caddy.service) or in a Docker container: the plugin finds every Caddy on the machine and lets you switch between them. Sites: every site of the Caddyfile and the files it imports, with what answers it (container, port, folder, redirect), whether that backend answers, and the state of its HTTPS certificate. Add, edit, turn off and delete sites with a form (reverse proxy, static files, PHP, redirect; compression, s...",
+  "manifest": {
+    "name": "Caddy",
+    "author": "Ervisio team",
+    "description": "Manage the Caddy web server, installed on the system or in a Docker container: sites, reverse proxies, the Caddyfile with history and checks, certificates and access logs.",
+    "homepage": "https://github.com/Ervisio/plugin-caddy",
+    "icon": "globe",
+    "color": "term",
+    "entry": "index.js",
+    "capabilities": {
+      "commands": [
+        {
+          "argv": [
+            "systemctl",
+            "show",
+            "caddy.service",
+            "--no-pager",
+            "--property=LoadState,ActiveState,SubState,MainPID,ExecMainStartTimestamp,ExecStart,FragmentPath,UnitFileState"
+          ],
+          "description": "Read the state of caddy.service",
+          "name": "service-show"
+        },
+        {
+          "argv": [
+            "caddy",
+            "version"
+          ],
+          "description": "Read the version of Caddy",
+          "name": "version"
+        },
+        {
+          "argv": [
+            "id",
+            "-un"
+          ],
+          "description": "Read your user name (for the history of changes)",
+          "name": "user"
+        },
+        {
+          "argv": [
+            "id",
+            "-Gn"
+          ],
+          "description": "Read your groups (to know if you can use Docker)",
+          "name": "groups"
+        },
+        {
+          "argv": [
+            "test",
+            "-S",
+            "/var/run/docker.sock"
+          ],
+          "description": "Check whether Docker is installed",
+          "name": "has-docker"
+        },
+        {
+          "admin": true,
+          "args": [
+            {
+              "maxLen": 8,
+              "pattern": "start|stop|restart|reload"
+            }
+          ],
+          "argv": [
+            "systemctl",
+            "{0}",
+            "caddy.service"
+          ],
+          "description": "Start, stop, restart or reload caddy.service",
+          "name": "service",
+          "timeoutSec": 120
+        },
+        {
+          "admin": true,
+          "args": [
+            {
+              "maxLen": 220,
+              "pattern": "/etc/caddy/[A-Za-z0-9._-]{1,100}(/[A-Za-z0-9._-]{1,100})?"
+            }
+          ],
+          "argv": [
+            "env",
+            "HOME=/run/ervisio-caddy",
+            "XDG_DATA_HOME=/run/ervisio-caddy/data",
+            "XDG_CONFIG_HOME=/run/ervisio-caddy/config",
+            "caddy",
+            "validate",
+            "--config",
+            "{0}",
+            "--adapter",
+            "caddyfile"
+          ],
+          "description": "Check a Caddyfile with caddy validate (in a scratch data folder, so nothing in Caddy's storage changes)",
+          "name": "validate",
+          "timeoutSec": 60
+        },
+        {
+          "args": [
+            {
+              "maxLen": 5,
+              "pattern": "[0-9]{1,5}"
+            }
+          ],
+          "argv": [
+            "journalctl",
+            "-u",
+            "caddy.service",
+            "-o",
+            "cat",
+            "--no-pager",
+            "-n",
+            "{0}"
+          ],
+          "description": "Read the last lines Caddy wrote to the system journal",
+          "name": "journal"
+        },
+        {
+          "admin": true,
+          "args": [
+            {
+              "maxLen": 5,
+              "pattern": "[0-9]{1,5}"
+            }
+          ],
+          "argv": [
+            "journalctl",
+            "-u",
+            "caddy.service",
+            "-o",
+            "cat",
+            "--no-pager",
+            "-n",
+            "{0}"
+          ],
+          "description": "Read Caddy's journal with administrator rights (when your account cannot read the journal)",
+          "name": "journal-admin"
+        },
+        {
+          "argv": [
+            "journalctl",
+            "-u",
+            "caddy.service",
+            "-o",
+            "cat",
+            "--no-pager",
+            "-f",
+            "-n",
+            "0"
+          ],
+          "description": "Follow Caddy's journal live",
+          "name": "journal-follow",
+          "timeoutSec": 600
+        },
+        {
+          "admin": true,
+          "argv": [
+            "journalctl",
+            "-u",
+            "caddy.service",
+            "-o",
+            "cat",
+            "--no-pager",
+            "-f",
+            "-n",
+            "0"
+          ],
+          "description": "Follow Caddy's journal live with administrator rights",
+          "name": "journal-follow-admin",
+          "timeoutSec": 600
+        },
+        {
+          "admin": true,
+          "args": [
+            {
+              "maxLen": 5,
+              "pattern": "[0-9]{1,5}"
+            },
+            {
+              "maxLen": 120,
+              "pattern": "/var/log/caddy/[A-Za-z0-9._-]{1,100}"
+            }
+          ],
+          "argv": [
+            "tail",
+            "-n",
+            "{0}",
+            "{1}"
+          ],
+          "description": "Read the end of an access log in /var/log/caddy",
+          "name": "tail"
+        },
+        {
+          "admin": true,
+          "args": [
+            {
+              "maxLen": 120,
+              "pattern": "/var/log/caddy/[A-Za-z0-9._-]{1,100}"
+            }
+          ],
+          "argv": [
+            "tail",
+            "-F",
+            "-n",
+            "0",
+            "{0}"
+          ],
+          "description": "Follow an access log in /var/log/caddy live",
+          "name": "tail-follow",
+          "timeoutSec": 600
+        },
+        {
+          "args": [
+            {
+              "maxLen": 270,
+              "pattern": "https?://[A-Za-z0-9._-]{1,253}(:[0-9]{1,5})?"
+            }
+          ],
+          "argv": [
+            "curl",
+            "-s",
+            "-k",
+            "-o",
+            "/dev/null",
+            "-w",
+            "%{http_code}",
+            "--connect-timeout",
+            "3",
+            "--max-time",
+            "4",
+            "{0}"
+          ],
+          "description": "Check that a site's backend answers (one HTTP request, 4 seconds at most)",
+          "name": "probe",
+          "timeoutSec": 10
+        },
+        {
+          "args": [
+            {
+              "maxLen": 253,
+              "pattern": "[A-Za-z0-9][A-Za-z0-9.-]{0,252}"
+            }
+          ],
+          "argv": [
+            "curl",
+            "-sv",
+            "-k",
+            "-o",
+            "/dev/null",
+            "--connect-timeout",
+            "3",
+            "--max-time",
+            "5",
+            "--resolve",
+            "{0}:443:127.0.0.1",
+            "https://{0}/"
+          ],
+          "description": "Read the certificate a site presents (connects to this machine on port 443)",
+          "name": "tls-check",
+          "timeoutSec": 10
+        },
+        {
+          "argv": [
+            "ip",
+            "-j",
+            "addr",
+            "show"
+          ],
+          "description": "List this machine's IP addresses (to check where a domain points)",
+          "name": "addresses"
+        },
+        {
+          "argv": [
+            "ss",
+            "-ltnH"
+          ],
+          "description": "List the ports that programs listen on (suggestions for a reverse proxy)",
+          "name": "ports"
+        }
+      ],
+      "files": {
+        "read": [
+          "/etc/caddy",
+          "/var/lib/ervisio-caddy",
+          {
+            "admin": true,
+            "path": "/var/lib/caddy/.local/share/caddy"
+          },
+          {
+            "admin": true,
+            "path": "/var/log/caddy"
+          }
+        ],
+        "write": [
+          {
+            "admin": true,
+            "path": "/etc/caddy"
+          },
+          {
+            "admin": true,
+            "create": true,
+            "path": "/var/lib/ervisio-caddy"
+          },
+          {
+            "create": true,
+            "path": "~/.config/ervisio/plugins/caddy"
+          }
+        ]
+      },
+      "http": [
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "headers": [
+            "Content-Type"
+          ],
+          "maxBody": 8388608,
+          "name": "docker",
+          "rules": [
+            {
+              "methods": [
+                "GET",
+                "HEAD"
+              ],
+              "path": "/_ping"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/version"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1\\.[0-9]+/containers/json"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1\\.[0-9]+/containers/[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}/(json|logs)"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1\\.[0-9]+/containers/[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}/(start|stop|restart|exec)"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1\\.[0-9]+/exec/[a-f0-9]{64}/start"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1\\.[0-9]+/exec/[a-f0-9]{64}/json"
+            }
+          ],
+          "socket": "/var/run/docker.sock",
+          "timeoutSec": 120
+        }
+      ],
+      "network": [
+        "cloudflare-dns.com"
+      ],
+      "sockets": [
+        "/var/run/docker.sock"
+      ]
+    },
+    "contributes": {
+      "pages": [
+        {
+          "icon": "globe",
+          "id": "caddy",
+          "title": "Caddy"
+        }
+      ],
+      "snippets": [
+        {
+          "command": "sudo systemctl reload caddy",
+          "name": "Reload Caddy"
+        },
+        {
+          "command": "caddy validate --config /etc/caddy/Caddyfile",
+          "name": "Check the Caddyfile"
+        }
+      ],
+      "widgets": [
+        {
+          "icon": "globe",
+          "id": "sites",
+          "title": "Caddy"
+        }
+      ]
+    },
+    "visibleTo": {
+      "groups": [
+        "wheel",
+        "sudo",
+        "docker"
+      ]
+    }
+  }
+}
