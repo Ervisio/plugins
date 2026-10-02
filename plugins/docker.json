@@ -1,11 +1,11 @@
 {
   "id": "docker",
   "repo": "Ervisio/plugin-docker",
-  "version": "2.0.1",
-  "tag": "v2.0.1",
-  "asset": "docker-2.0.1.tar.gz",
-  "upstreamSha256": "0595732a9806e1f75aa680be1305463700572b9ab0f7b263135fdd461317b891",
-  "notes": "First release from its own repository. The features are those of the Docker plugin 2.0.1 that shipped inside Ervisio 0.3.0: containers, Compose stacks, images, volumes and networks, live stats, logs, shell, templates, private registries, automatic updates, alerts and clean-up. Settings stay in `~/.config/ervisio/plugins/docker`. The plugin is now installed from the Ervisio marketplace and signed by the Ervisio team; the permissions are unchanged.",
+  "version": "2.1.0",
+  "tag": "v2.1.0",
+  "asset": "docker-2.1.0.tar.gz",
+  "upstreamSha256": "2e9fbc454fcf8c4f3791fb03a119abcea489c2dc97d49801aa75d2298d0898c8",
+  "notes": "Stacks started by Portainer now work. Portainer runs `docker compose` inside its own container, so a stack's folder (`/data/compose/<id>`) lives in Portainer's volume and not on the host. Ervisio finds the container that mounts that folder, reads the compose file and the `stack.env` file through the Docker API and shows them read only, instead of an error. The same works for other tools that keep their stacks in a container. \"Move to /opt/stacks\" works for those stacks. It copies the compose...",
   "manifest": {
     "name": "Docker",
     "author": "Ervisio team",
@@ -478,7 +478,7 @@
               "methods": [
                 "GET"
               ],
-              "path": "/v1\\.[0-9]+/containers/[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}/(json|logs|stats|top|changes)"
+              "path": "/v1\\.[0-9]+/containers/[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}/(json|logs|stats|top|changes|archive)"
             },
             {
               "methods": [
