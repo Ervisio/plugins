@@ -1,0 +1,75 @@
+{
+  "id": "database",
+  "repo": "Ervisio/plugin-database",
+  "version": "1.1.0",
+  "tag": "v1.1.0",
+  "asset": "database-1.1.0.tar.gz",
+  "upstreamSha256": "da2b469346e33fb762801affcee9ef7f90d20f119028f09cfabbf12473e69cdd",
+  "notes": "HeidiSQL-grade database workbench for MySQL, MariaDB, PostgreSQL, and SQLite. Zero-terminal deployment: 1-click Docker container deployment (MySQL 8.4/8.0/9.0, MariaDB 11.4/10.11, PostgreSQL 17/16). Zero-terminal native APT installation for `mariadb-server`, `mysql-server`, `postgresql`, and `sqlite3`. Standalone SQLite database creator and auto-discovery across filesystem. Interactive schema tree with tables, views, and engine metrics. Editable data grid with inline cell editing, pagination,...",
+  "manifest": {
+    "name": "Databases",
+    "author": "Ervisio Community",
+    "description": "HeidiSQL-style database manager for MySQL, MariaDB, PostgreSQL and SQLite: schema tree, editable data grid with live search and filters, SQL editor with autocomplete, users and slow query log.",
+    "homepage": "https://github.com/Ervisio",
+    "icon": "database",
+    "entry": "index.js",
+    "capabilities": {
+      "commands": [
+        {
+          "name": "db-bridge",
+          "description": "Ervisio Database Engine Bridge",
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "timeoutSec": 120,
+          "argv": [
+            "python3",
+            "/var/lib/ervisio/plugins/database/db-bridge.py",
+            "{0}",
+            "{1}"
+          ],
+          "args": [
+            {
+              "pattern": "[a-zA-Z0-9_-]+",
+              "maxLen": 64
+            },
+            {
+              "pattern": ".*",
+              "allowDash": true,
+              "maxLen": 4096
+            }
+          ]
+        }
+      ],
+      "files": {
+        "write": [
+          {
+            "create": true,
+            "path": "~/.config/ervisio/plugins/database"
+          }
+        ]
+      }
+    },
+    "contributes": {
+      "pages": [
+        {
+          "id": "database",
+          "title": "Databases",
+          "icon": "database"
+        }
+      ],
+      "snippets": [
+        {
+          "name": "Check Database Containers",
+          "command": "docker ps --filter 'name=db-'"
+        }
+      ]
+    },
+    "visibleTo": {
+      "groups": [
+        "wheel",
+        "sudo",
+        "docker"
+      ]
+    }
+  }
+}
