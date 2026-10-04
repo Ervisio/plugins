@@ -4,12 +4,14 @@
     {"id": "Security", "name": "Security", "icon": "shield", "color": "svc"},
     {"id": "Networking", "name": "Networking", "icon": "globe", "color": "term"},
     {"id": "Storage", "name": "Storage", "icon": "disk", "color": "sw"},
+    {"id": "Databases", "name": "Databases", "icon": "database", "color": "file"},
     {"id": "Monitoring", "name": "Monitoring", "icon": "zap", "color": "ov"},
     {"id": "Web servers", "name": "Web servers", "icon": "globe", "color": "log"},
     {"id": "Games", "name": "Games", "icon": "play", "color": "term"}
   ],
   "plugins": [
     {"id": "docker", "repo": "Ervisio/plugin-docker", "trust": "team", "category": "Containers", "featured": true},
+    {"id": "database", "repo": "Ervisio/plugin-database", "trust": "team", "category": "Databases", "featured": true},
     {"id": "caddy", "repo": "Ervisio/plugin-caddy", "trust": "team", "category": "Web servers"},
     {"id": "minecraft", "repo": "Ervisio/plugin-minecraft", "trust": "team", "category": "Games"},
     {"id": "firewall", "repo": "Ervisio/plugin-firewall", "trust": "team", "category": "Security"}
