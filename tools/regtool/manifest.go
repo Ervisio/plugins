@@ -50,6 +50,9 @@ func readManifest(dir string) (*pluginManifest, error) {
 	if v, ok := raw["requires"]; ok && !bytes.Equal(bytes.TrimSpace(v), []byte("null")) {
 		m.Reviewed.Requires = compact(v)
 	}
+	if v, ok := raw["platforms"]; ok && !bytes.Equal(bytes.TrimSpace(v), []byte("null")) {
+		m.Reviewed.Platforms = compact(v)
+	}
 	return m, nil
 }
 
@@ -91,7 +94,7 @@ func compareReviewed(e *Entry, m *pluginManifest) []string {
 	for _, f := range []struct {
 		name      string
 		want, got json.RawMessage
-	}{{"capabilities", r.Capabilities, got.Capabilities}, {"contributes", r.Contributes, got.Contributes}, {"visibleTo", r.VisibleTo, got.VisibleTo}, {"requires", r.Requires, got.Requires}} {
+	}{{"capabilities", r.Capabilities, got.Capabilities}, {"contributes", r.Contributes, got.Contributes}, {"visibleTo", r.VisibleTo, got.VisibleTo}, {"requires", r.Requires, got.Requires}, {"platforms", r.Platforms, got.Platforms}} {
 		if len(f.want) == 0 && len(f.got) == 0 {
 			continue
 		}

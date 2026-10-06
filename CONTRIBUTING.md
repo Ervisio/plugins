@@ -53,8 +53,9 @@ the plugin is signed and appears in the catalog within minutes.
 
 ## Updates
 
-Tag a new version; nothing else is needed. The sync workflow notices it within six hours and opens a pull request
-with a summary of the permission changes. Updates that add or widen permissions get the `new-permissions` label and a
+Release a new version (with the SDK's release workflow: Actions › Release › Run workflow); nothing else is needed.
+The sync workflow notices it at once (or within six hours) and opens a pull request with a summary of the permission
+changes. Team plugins skip the pull request when the update asks for no new permissions. Updates that add or widen permissions get the `new-permissions` label and a
 closer review. When the pull request is merged, the new version is signed and published, and consoles offer the update
 in **Plugins › Updates** (asking the user again when permissions changed).
 

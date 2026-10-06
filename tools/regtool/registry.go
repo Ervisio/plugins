@@ -63,6 +63,8 @@ type Reviewed struct {
 	// MinCore and Requires say which Ervisio the plugin needs (core 0.5.0).
 	MinCore  string          `json:"minCore,omitempty"`
 	Requires json.RawMessage `json:"requires,omitempty"`
+	// Platforms: the systems the plugin works on (core 0.6.1); empty = Linux.
+	Platforms json.RawMessage `json:"platforms,omitempty"`
 }
 
 var (

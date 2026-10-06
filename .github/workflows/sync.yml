@@ -1,5 +1,10 @@
-# Looks for new releases of the plugins listed in registry.json and opens a
-# pull request per new version, with a summary of the permission changes.
+# Looks for new releases of the plugins listed in registry.json. A new
+# version of a team plugin that asks for no new permissions is committed to
+# main and published at once; anything else (community plugins, new
+# permissions, a plugin's first version) becomes a pull request with a
+# summary of the permission changes. Plugin release workflows start it right
+# away with a repository_dispatch (plugin-release); the schedule is the
+# fallback.
 # The plugin repositories need no secret: this workflow pulls their public
 # releases with its own GITHUB_TOKEN.
 #
@@ -23,6 +28,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write   # starts Publish after a direct (no-review) update
 
 concurrency:
   group: sync
