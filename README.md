@@ -15,7 +15,9 @@ Plugin authors: see [CONTRIBUTING.md](CONTRIBUTING.md).
 ## Trust model
 
 * Only maintainers merge into `main`. Every plugin listed in `registry.json` is reviewed by a maintainer, and so is
-  every new version of it (a pull request per version).
+  every new version of a community plugin (a pull request per version). For **team** plugins only the first version
+  and updates that add or widen permissions are reviewed; any other team update is published as soon as it is
+  released (its permissions are exactly what was reviewed before).
 * After a version is merged, CI signs it with the **Ervisio team key** (ed25519). The consoles only run plugins whose
   signature verifies against that key (`plugins.allow_unsigned = false` is their default), so a package that was not
   reviewed here cannot be installed from the marketplace.
@@ -28,15 +30,20 @@ Plugin authors: see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## How a release flows
 
-1. The plugin repository tags `vX.Y.Z` (equal to the manifest version). Its release workflow builds the package and
-   attaches `<id>-<X.Y.Z>.tar.gz` (one top folder `<id>/`, unsigned `manifest.json`) and `<id>-<X.Y.Z>.tar.gz.sha256`.
+1. The plugin repository releases `vX.Y.Z`: Actions › Release › Run workflow (patch / minor / major), the reusable
+   workflow of Ervisio/plugin-sdk. It bumps the version, writes the changelog, tags, builds and attaches
+   `<id>-<X.Y.Z>.tar.gz` (one top folder `<id>/`, unsigned `manifest.json`) and `<id>-<X.Y.Z>.tar.gz.sha256`, then
+   starts Sync here with a `repository_dispatch` (organization secret `REGISTRY_TOKEN`).
 2. **Sync** (`.github/workflows/sync.yml`, every 6 hours, or by hand / `repository_dispatch` `plugin-release`) finds
    the new release, downloads it, checks the checksum, unpacks it safely, validates the manifest with the core's own
    rules (`plugin-sign` built from `Ervisio/ervisio` at `CORE_REF`, with a throwaway key) and opens a pull request that
    updates `plugins/<id>.json`. The description lists the permission changes ("New permissions", "Changed permissions",
    "Removed permissions") with warnings for administrator rights, the Docker socket, network hosts and writable system
    folders. Updates that add or widen permissions get the `new-permissions` label.
-3. A maintainer reviews the source at the tag and the permission summary, then merges.
+   **Team plugin, update with no new permissions:** instead of a pull request, Sync commits the entry to `main` and
+   starts Publish; the version is in the catalog a few minutes after the release. If `main` refuses the push
+   (branch protection without a bypass for GitHub Actions), it falls back to a pull request.
+3. Otherwise a maintainer reviews the source at the tag and the permission summary, then merges.
 4. **Publish** (`.github/workflows/publish.yml`, on every merge to `main`) downloads the reviewed package again,
    checks that its checksum and manifest are exactly the reviewed ones, signs it (`manifest.json` with the sha256 of
    every file, `manifest.sig`), verifies the signature against the team key embedded in the core, repacks it
@@ -80,6 +87,7 @@ curl -fsSLO https://ervisio.github.io/plugins/catalog.sig
 | Name | Where | What |
 |---|---|---|
 | `PLUGIN_SIGNING_KEY` | Repository secret | The team private key: the content of the key file written by `plugin-sign -genkey` (one line, base64 of the 64-byte ed25519 private key). Only the publish workflow reads it, writes it to a temporary file with mode 0600 and deletes it. |
+| `REGISTRY_TOKEN` | Organization secret (for the plugin repositories) | A fine-grained token with access to Ervisio/plugins only, permission "Contents: read and write" (needed for `repository_dispatch`). Plugin release workflows use it to start Sync at once. Without it Sync still runs every six hours. |
 
 A release maintainer sets it from the machine that holds the key (the command reads the file; the key never appears
 on the command line):
@@ -93,6 +101,8 @@ Until the secret exists, the publish workflow stops with "PLUGIN_SIGNING_KEY is 
 
 * Branch protection on `main`: require a pull request with one approving review, require the **Check** and **CI**
   checks, no force pushes. Signing happens only on `main`, so this is what keeps unreviewed code out of the catalog.
+  For automatic team updates, add **GitHub Actions** to the bypass list of that rule (rulesets: "Bypass list ›
+  Repository admin / GitHub Actions"); without it those updates become pull requests as before.
 * Pages: source "GitHub Actions" (Settings › Pages).
 * Actions: "Allow GitHub Actions to create and approve pull requests" (Settings › Actions › General), needed by the
   sync workflow.

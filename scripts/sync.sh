@@ -55,6 +55,30 @@ sync_one() {
     git checkout -q -- "plugins/$id.json" 2>/dev/null || rm -f "plugins/$id.json"
     return 0
   fi
+  # Team plugins whose update asks for no new permissions are published at
+  # once: committed to main, then the Publish workflow is started (a push
+  # made with GITHUB_TOKEN does not start workflows by itself). The first
+  # version of a plugin and any update with new permissions still need a
+  # reviewed pull request.
+  if [ "$trust" = team ] && [ -n "$current" ] && ! grep -qx new-permissions "$WORK/labels-$id" && [ "${AUTO_PUBLISH:-1}" = 1 ]; then
+    git fetch -q origin main
+    git checkout -q -B "auto/$id" origin/main
+    git add "plugins/$id.json"
+    git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+      commit -q -m "Update $id to $version" -m "From $repo $tag ($asset, sha256 $sum). Team plugin, no new permissions: published without review."
+    if git push -q origin "HEAD:main"; then
+      note "$id $version: no new permissions, published directly"
+      if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+        { echo "### $id $version published (team plugin, no new permissions)"; cat "$WORK/body-$id.md"; } >> "$GITHUB_STEP_SUMMARY"
+      fi
+      git fetch -q origin main
+      git checkout -q main && git reset -q --hard origin/main
+      : > "$WORK/publish-needed"   # sync_one runs in a subshell
+      return 0
+    fi
+    note "$id $version: could not push to main (protected?), opening a pull request instead"
+    git checkout -q main
+  fi
   git checkout -q -B "$branch" origin/main
   git add "plugins/$id.json"
   git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
@@ -92,4 +116,7 @@ while read -r -u 3 id repo trust; do
     git checkout -q main 2>/dev/null || true
   fi
 done 3< <(regtool list)
+if [ -f "$WORK/publish-needed" ] && [ "${DRY_RUN:-}" != 1 ]; then
+  gh workflow run publish.yml --repo "$REGISTRY_REPO" --ref main || { echo "::error::could not start the Publish workflow"; failed=1; }
+fi
 exit "$failed"
