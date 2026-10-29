@@ -27,7 +27,7 @@ while read -r -u 3 number; do
   checks="$(gh api "repos/$GITHUB_REPOSITORY/commits/$HEAD_SHA/check-runs" --paginate --jq '.check_runs[] | [.name, .status, .conclusion, (.app.id|tostring)] | @tsv')"
   # Both required checks must have completed successfully on this exact head.
   for name in check 'regtool (gofmt, go vet, go test)'; do
-    if ! awk -F '\t' -v name="$name" '$1==name && $2=="completed" && $3=="success" && $4=="15368" {ok=1} END {exit !ok}' <<< "$checks"; then
+    if ! awk -F '\t' -v name="$name" '$1==name && $4=="15368" {seen=1; if ($2!="completed" || $3!="success") bad=1} END {exit (!seen || bad)}' <<< "$checks"; then
       echo "PR #$number: waiting for $name"; continue 2
     fi
   done
