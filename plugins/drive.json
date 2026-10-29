@@ -1,11 +1,11 @@
 {
   "id": "drive",
   "repo": "Ervisio/ErvisioDrive",
-  "version": "0.2.0",
-  "tag": "v0.2.0",
-  "asset": "drive-0.2.0.tar.gz",
-  "upstreamSha256": "f6ac7280af7fbfd8634d135320f1089a244e9214ac93c44dbeb07ec2f5c3dc7b",
-  "notes": "Works with drives installed without the Ervisio integration: the plugin finds the drive's container in Docker and reaches its API from inside it. A drive found in Docker but stopped can be started from the page. With no drive on the machine, the page installs one: it downloads this release to `/opt/ervisio-drive` and runs `./setup.sh --ervisio yes`, then shows the owner's activation link. New permissions: the `install` command (administrator, runs the setup in the transient unit `ervisio-driv...",
+  "version": "0.3.0",
+  "tag": "v0.3.0",
+  "asset": "drive-0.3.0.tar.gz",
+  "upstreamSha256": "3f6ec26414180eed18d5557e9d3263713ea5665a2078b1428c472db3f84cec6c",
+  "notes": "Subfolders at any depth from the UI, with a clickable path and \"up one level\". Explorer view: folder tree and a table sortable by name, type, size, created and modified. Sort menu for every view, ascending or descending. Select several files (Shift for a range, Cmd+A for all) and move, download or delete them together. Delete a folder with its subfolders and, optionally, its files. Expandable sidebar, with tooltips when collapsed.",
   "manifest": {
     "name": "ErvisioDrive",
     "author": "Riccardo Reccia",
