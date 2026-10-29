@@ -1,11 +1,11 @@
 {
   "id": "drive",
   "repo": "Ervisio/ErvisioDrive",
-  "version": "0.3.0",
-  "tag": "v0.3.0",
-  "asset": "drive-0.3.0.tar.gz",
-  "upstreamSha256": "3f6ec26414180eed18d5557e9d3263713ea5665a2078b1428c472db3f84cec6c",
-  "notes": "Subfolders at any depth from the UI, with a clickable path and \"up one level\". Explorer view: folder tree and a table sortable by name, type, size, created and modified. Sort menu for every view, ascending or descending. Select several files (Shift for a range, Cmd+A for all) and move, download or delete them together. Delete a folder with its subfolders and, optionally, its files. Expandable sidebar, with tooltips when collapsed.",
+  "version": "0.4.0",
+  "tag": "v0.4.0",
+  "asset": "drive-0.4.0.tar.gz",
+  "upstreamSha256": "3e23561cf1ed61ed8344916d2442d8bb76f62a2f7fdec2048e64774e95b20207",
+  "notes": "Update the drive from the plugin: when the drive is older, a strip under the header offers the update, then shows its log until the drive runs again (new admin command `update`). The drive reports its version to the plugin.",
   "manifest": {
     "name": "ErvisioDrive",
     "author": "Riccardo Reccia",
@@ -116,14 +116,38 @@
           "timeoutSec": 60
         },
         {
+          "admin": true,
+          "args": [
+            {
+              "maxLen": 11,
+              "pattern": "[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}"
+            },
+            {
+              "maxLen": 200,
+              "pattern": "/[A-Za-z0-9._/-]{1,199}"
+            }
+          ],
+          "argv": [
+            "sh",
+            "-c",
+            "systemctl stop ervisio-drive-install.service 2>/dev/null; systemctl reset-failed ervisio-drive-install.service 2>/dev/null; exec systemd-run --unit=ervisio-drive-install --description='Update ErvisioDrive' --remain-after-exit --setenv=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin sh -c \"$0\" update \"$1\" \"$2\"",
+            "set -eu\nv=\"$1\"; d=\"$2\"\ncase \"$d\" in *..*|*//*) echo \"Refusing the folder $d\"; exit 1;; esac\ncommand -v docker >/dev/null || { echo \"Docker is not installed\"; exit 1; }\ngrep -q '^name: ervisiodrive' \"$d/compose.yaml\" 2>/dev/null || { echo \"$d is not an ErvisioDrive folder (no compose.yaml named ervisiodrive)\"; exit 1; }\ncd \"$d\"\nif [ -d .git ]; then\n  g() { git -c safe.directory=\"$d\" \"$@\"; }\n  [ -z \"$(g status --porcelain --untracked-files=no)\" ] || { echo \"$d has local changes: commit or stash them, then update again\"; exit 1; }\n  echo \"Fetching v$v with git\"\n  g fetch -q --tags origin\n  g -c advice.detachedHead=false checkout -q \"v$v\"\nelse\n  url=\"https://github.com/Ervisio/ErvisioDrive/archive/refs/tags/v$v.tar.gz\"\n  echo \"Downloading $url\"\n  if command -v curl >/dev/null; then curl -fsSL \"$url\"; else wget -qO- \"$url\"; fi | tar -xz --strip-components=1 -C \"$d\"\nfi\necho \"Rebuilding and restarting the drive\"\nexec docker compose up -d --build --wait --wait-timeout 300",
+            "{0}",
+            "{1}"
+          ],
+          "description": "Update ErvisioDrive to the release matching this plugin in the folder its containers were started from: git checkout of the release tag (a git clone) or the release archive unpacked over the folder (.env and data are kept), then docker compose up --build, in the systemd unit ervisio-drive-install",
+          "name": "update",
+          "timeoutSec": 60
+        },
+        {
           "argv": [
             "systemctl",
             "show",
             "ervisio-drive-install.service",
             "--no-pager",
-            "--property=LoadState,ActiveState,SubState,Result,InvocationID"
+            "--property=LoadState,ActiveState,SubState,Result,InvocationID,Description"
           ],
-          "description": "Read the state of the installation unit (ervisio-drive-install)",
+          "description": "Read the state of the installation or update unit (ervisio-drive-install)",
           "name": "install-state"
         },
         {
