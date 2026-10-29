@@ -1,15 +1,15 @@
 {
   "id": "database",
   "repo": "Ervisio/plugin-database",
-  "version": "1.1.0",
-  "tag": "v1.1.0",
-  "asset": "database-1.1.0.tar.gz",
-  "upstreamSha256": "da2b469346e33fb762801affcee9ef7f90d20f119028f09cfabbf12473e69cdd",
-  "notes": "HeidiSQL-grade database workbench for MySQL, MariaDB, PostgreSQL, and SQLite. Zero-terminal deployment: 1-click Docker container deployment (MySQL 8.4/8.0/9.0, MariaDB 11.4/10.11, PostgreSQL 17/16). Zero-terminal native APT installation for `mariadb-server`, `mysql-server`, `postgresql`, and `sqlite3`. Standalone SQLite database creator and auto-discovery across filesystem. Interactive schema tree with tables, views, and engine metrics. Editable data grid with inline cell editing, pagination,...",
+  "version": "1.2.1",
+  "tag": "v1.2.1",
+  "asset": "database-1.2.1.tar.gz",
+  "upstreamSha256": "c096837d5f58fd7e4719a41188cab4531ae4fa4cd259261c3c4bdd4df81b7530",
+  "notes": "Run CI manually instead of on every push and pull request Add one-command plugin release and marketplace registration (#4) Add MongoDB and Redis/Valkey drivers, Docker and local service discovery README: one-button releases One-button releases with the SDK's release workflow Add Windows support (SDK 0.3.0, platforms manifest, cross-platform bridge)",
   "manifest": {
     "name": "Databases",
     "author": "Ervisio Community",
-    "description": "HeidiSQL-style database manager for MySQL, MariaDB, PostgreSQL and SQLite: schema tree, editable data grid with live search and filters, SQL editor with autocomplete, users and slow query log.",
+    "description": "HeidiSQL-style database manager for MySQL, MariaDB, PostgreSQL, SQLite, MongoDB and Redis/Valkey: schema tree, editable data grid with live search and filters, query editor with autocomplete, users and slow query log.",
     "homepage": "https://github.com/Ervisio",
     "icon": "database",
     "entry": "index.js",
@@ -37,6 +37,36 @@
               "allowDash": true,
               "maxLen": 4096
             }
+          ],
+          "platforms": [
+            "linux"
+          ]
+        },
+        {
+          "name": "db-bridge",
+          "description": "Ervisio Database Engine Bridge",
+          "admin": true,
+          "adminUnlessGroup": "docker-users",
+          "timeoutSec": 120,
+          "argv": [
+            "python.exe",
+            "C:\\ProgramData\\Ervisio\\data\\plugins\\database\\db-bridge.py",
+            "{0}",
+            "{1}"
+          ],
+          "args": [
+            {
+              "pattern": "[a-zA-Z0-9_-]+",
+              "maxLen": 64
+            },
+            {
+              "pattern": ".*",
+              "allowDash": true,
+              "maxLen": 4096
+            }
+          ],
+          "platforms": [
+            "windows"
           ]
         }
       ],
@@ -68,8 +98,14 @@
       "groups": [
         "wheel",
         "sudo",
-        "docker"
+        "docker",
+        "docker-users"
       ]
-    }
+    },
+    "minCore": "0.6.2",
+    "platforms": [
+      "linux",
+      "windows"
+    ]
   }
 }
