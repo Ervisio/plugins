@@ -77,12 +77,15 @@ sync_one() {
       return 0
     fi
     note "$id $version: could not push to main (protected?), opening a pull request instead"
-    git checkout -q main
+    # The update is already committed on auto/$id: open the pull request
+    # from that commit instead of a fresh branch without it.
+    git checkout -q -B "$branch" "auto/$id"
+  else
+    git checkout -q -B "$branch" origin/main
+    git add "plugins/$id.json"
+    git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+      commit -q -m "Update $id to $version" -m "From $repo $tag ($asset, sha256 $sum)."
   fi
-  git checkout -q -B "$branch" origin/main
-  git add "plugins/$id.json"
-  git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
-    commit -q -m "Update $id to $version" -m "From $repo $tag ($asset, sha256 $sum)."
   git push -q -f origin "$branch"
   local labels=()
   while IFS= read -r l; do
