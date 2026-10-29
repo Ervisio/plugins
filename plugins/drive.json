@@ -1,0 +1,232 @@
+{
+  "id": "drive",
+  "repo": "Ervisio/ErvisioDrive",
+  "version": "0.1.0",
+  "tag": "v0.1.0",
+  "asset": "drive-0.1.0.tar.gz",
+  "upstreamSha256": "3017310b9662c4031160951d0bb6f225d3157011e4b43c7e4870d3bf80cd9aba",
+  "notes": "First release: ErvisioDrive as an Ervisio plugin. Overview of the drive: state, space used, files and people, with a console widget. Limits: total space, file size, per-person quota, requests and statistics, with \"unlimited\" and the values of the drive's `.env`. People: space used by each person, personal quota (default, custom, unlimited) and invitations. Web address: offers a Caddy site for the drive and checks the Caddyfile before reloading it.",
+  "manifest": {
+    "name": "ErvisioDrive",
+    "author": "Riccardo Reccia",
+    "description": "Manage ErvisioDrive running on this machine: storage, members, quotas, settings and statistics, and publish it on its own web address through Caddy.",
+    "icon": "files",
+    "color": "file",
+    "entry": "index.js",
+    "capabilities": {
+      "commands": [
+        {
+          "argv": [
+            "systemctl",
+            "show",
+            "caddy.service",
+            "--no-pager",
+            "--property=LoadState,ActiveState,SubState,ExecStart,FragmentPath"
+          ],
+          "description": "Read the state of caddy.service and the Caddyfile it loads (to offer a web address for the drive)",
+          "name": "service-show"
+        },
+        {
+          "admin": true,
+          "args": [
+            {
+              "maxLen": 220,
+              "pattern": "/etc/caddy/[A-Za-z0-9._-]{1,100}(/[A-Za-z0-9._-]{1,100})?"
+            }
+          ],
+          "argv": [
+            "env",
+            "HOME=/run/ervisio-drive-caddy",
+            "XDG_DATA_HOME=/run/ervisio-drive-caddy/data",
+            "XDG_CONFIG_HOME=/run/ervisio-drive-caddy/config",
+            "caddy",
+            "validate",
+            "--config",
+            "{0}",
+            "--adapter",
+            "caddyfile"
+          ],
+          "description": "Check the Caddyfile with caddy validate before Caddy reloads it (in a scratch data folder, so nothing in Caddy's storage changes)",
+          "name": "validate",
+          "timeoutSec": 60
+        },
+        {
+          "admin": true,
+          "argv": [
+            "systemctl",
+            "reload",
+            "caddy.service"
+          ],
+          "description": "Reload caddy.service after adding or removing the drive's site",
+          "name": "reload",
+          "timeoutSec": 120
+        },
+        {
+          "argv": [
+            "test",
+            "-S",
+            "/var/run/docker.sock"
+          ],
+          "description": "Check whether Docker is installed (before looking for Caddy containers)",
+          "name": "has-docker"
+        },
+        {
+          "argv": [
+            "id",
+            "-un"
+          ],
+          "description": "Read your user name (root uses Docker without an unlock prompt)",
+          "name": "user"
+        },
+        {
+          "argv": [
+            "id",
+            "-Gn"
+          ],
+          "description": "Read your groups (members of docker use Docker without an unlock prompt)",
+          "name": "groups"
+        }
+      ],
+      "files": {
+        "read": [
+          "/etc/caddy"
+        ],
+        "write": [
+          {
+            "admin": true,
+            "path": "/etc/caddy"
+          },
+          {
+            "create": true,
+            "path": "~/.config/ervisio/plugins/drive"
+          }
+        ]
+      },
+      "http": [
+        {
+          "admin": true,
+          "headers": [
+            "Content-Type"
+          ],
+          "maxBody": 8388608,
+          "name": "drive",
+          "rules": [
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/api/plugin/(status|settings|members|stats(/tokens(/[a-f0-9]{24})?)?)"
+            },
+            {
+              "methods": [
+                "PATCH"
+              ],
+              "path": "/api/plugin/(settings|members)"
+            },
+            {
+              "methods": [
+                "POST",
+                "DELETE"
+              ],
+              "path": "/api/plugin/members"
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "path": "/api/plugin/public-url"
+            }
+          ],
+          "socket": "/run/ervisio-drive/api.sock",
+          "timeoutSec": 60
+        },
+        {
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "headers": [
+            "Content-Type"
+          ],
+          "maxBody": 8388608,
+          "name": "docker",
+          "rules": [
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/version"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1\\.[0-9]+/containers/json"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1\\.[0-9]+/containers/[a-f0-9]{12,64}/json"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1\\.[0-9]+/containers/[a-f0-9]{12,64}/exec"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1\\.[0-9]+/exec/[a-f0-9]{64}/start"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1\\.[0-9]+/exec/[a-f0-9]{64}/json"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1\\.[0-9]+/networks/ervisiodrive_edge/connect"
+            }
+          ],
+          "socket": "/var/run/docker.sock",
+          "timeoutSec": 120
+        }
+      ],
+      "sockets": [
+        "/run/ervisio-drive/api.sock",
+        "/var/run/docker.sock"
+      ]
+    },
+    "contributes": {
+      "pages": [
+        {
+          "icon": "files",
+          "id": "drive",
+          "title": "ErvisioDrive"
+        }
+      ],
+      "widgets": [
+        {
+          "icon": "disk",
+          "id": "usage",
+          "title": "ErvisioDrive"
+        }
+      ]
+    },
+    "visibleTo": {
+      "groups": [
+        "wheel",
+        "sudo",
+        "docker"
+      ]
+    },
+    "minCore": "0.6.1",
+    "platforms": [
+      "linux"
+    ]
+  }
+}
