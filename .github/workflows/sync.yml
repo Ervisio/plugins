@@ -1,21 +1,11 @@
-# Looks for new releases of the plugins listed in registry.json. A new
-# version of a team plugin that asks for no new permissions is committed to
-# main and published at once; anything else (community plugins, new
-# permissions, a plugin's first version) becomes a pull request with a
-# summary of the permission changes. Plugin release workflows start it right
-# away with a repository_dispatch (plugin-release); the schedule is the
-# fallback.
-# The plugin repositories need no secret: this workflow pulls their public
-# releases with its own GITHUB_TOKEN.
-#
-# Pull requests opened with GITHUB_TOKEN do not start other workflows: this
-# job already validated the package; to run check.yml on such a pull
-# request, close and reopen it.
+# Find stable releases and propose version entries. Explicitly dispatch both
+# required checks for bot PRs; trusted workflow_run automation merges only
+# routine team updates with exactly unchanged permissions.
 name: Sync plugin releases
 
 on:
   schedule:
-    - cron: '17 */6 * * *'
+    - cron: '7,22,37,52 * * * *'
   workflow_dispatch:
     inputs:
       id:
@@ -28,7 +18,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  actions: write   # starts Publish after a direct (no-review) update
+  actions: write   # dispatches the required checks for bot-generated PRs
 
 concurrency:
   group: sync
@@ -51,3 +41,4 @@ jobs:
           REGISTRY_REPO: ${{ github.repository }}
           ONLY: ${{ github.event.inputs.id || github.event.client_payload.id || '' }}
         run: ./scripts/sync.sh "$ONLY"
+

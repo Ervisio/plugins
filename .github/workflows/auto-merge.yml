@@ -1,0 +1,27 @@
+name: Publish validated team updates
+on:
+  workflow_run:
+    workflows: [CI, Check]
+    types: [completed]
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+concurrency:
+  group: registry-auto-merge
+  cancel-in-progress: false
+jobs:
+  merge:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    steps:
+      # workflow_run is privileged: always execute scripts from trusted main.
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Merge only validated bot updates with identical permissions
+        env:
+          GH_TOKEN: ${{ secrets.REGISTRY_MERGE_TOKEN || github.token }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: bash scripts/auto-merge.sh
