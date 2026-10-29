@@ -15,9 +15,7 @@ Plugin authors: see [CONTRIBUTING.md](CONTRIBUTING.md).
 ## Trust model
 
 * Only maintainers merge into `main`. Every plugin listed in `registry.json` is reviewed by a maintainer, and so is
-  every new version of a community plugin (a pull request per version). For **team** plugins only the first version
-  and updates that add or widen permissions are reviewed; any other team update is published as soon as it is
-  released (its permissions are exactly what was reviewed before).
+  every new version of a community plugin (a pull request per version). For **team** plugins first versions and permission changes are reviewed; routine updates with exactly unchanged permissions are validated and merged automatically, subject to repository rules.
 * After a version is merged, CI signs it with the **Ervisio team key** (ed25519). The consoles only run plugins whose
   signature verifies against that key (`plugins.allow_unsigned = false` is their default), so a package that was not
   reviewed here cannot be installed from the marketplace.
@@ -28,37 +26,57 @@ Plugin authors: see [CONTRIBUTING.md](CONTRIBUTING.md).
 * `trust` in `registry.json` says who wrote a plugin: `team` (the Ervisio team) or `community` (a third party, reviewed
   by the maintainers). Both are signed and shown as verified once they are listed.
 
+## Publishing: everyday use
+
+After committing, merging and pushing a plugin's code:
+
+```sh
+npm run release -- patch          # or minor / major
+```
+
+The GitHub CLI must be installed and logged in (`gh auth login`, once). The command checks your checkout, starts the
+release workflow and prints its URL. Version, changelog, tests, package, checksum and GitHub release are automatic.
+Build/tests/manifest validation complete before the version and tag are pushed together. Pull the resulting release
+commit with `git pull --ff-only`. Drive runs this from `plugin/`.
+
+For a **new plugin**, publish its first release, then run `npm run marketplace -- "Monitoring"`, or open
+**Actions → Register plugin** here and enter its id, source repository and category. The workflow validates the
+package and opens **one PR containing `registry.json` plus `plugins/<id>.json`**. Review and merge it once.
+
 ## How a release flows
 
-1. The plugin repository releases `vX.Y.Z`: Actions › Release › Run workflow (patch / minor / major), the reusable
-   workflow of Ervisio/plugin-sdk. It bumps the version, writes the changelog, tags, builds and attaches
-   `<id>-<X.Y.Z>.tar.gz` (one top folder `<id>/`, unsigned `manifest.json`) and `<id>-<X.Y.Z>.tar.gz.sha256`, then
-   starts Sync here with a `repository_dispatch` (organization secret `REGISTRY_TOKEN`).
-2. **Sync** (`.github/workflows/sync.yml`, every 6 hours, or by hand / `repository_dispatch` `plugin-release`) finds
-   the new release, downloads it, checks the checksum, unpacks it safely, validates the manifest with the core's own
-   rules (`plugin-sign` built from `Ervisio/ervisio` at `CORE_REF`, with a throwaway key) and opens a pull request that
-   updates `plugins/<id>.json`. The description lists the permission changes ("New permissions", "Changed permissions",
-   "Removed permissions") with warnings for administrator rights, the Docker socket, network hosts and writable system
-   folders. Updates that add or widen permissions get the `new-permissions` label.
-   **Team plugin, update with no new permissions:** instead of a pull request, Sync commits the entry to `main` and
-   starts Publish; the version is in the catalog a few minutes after the release. If `main` refuses the push
-   (branch protection without a bypass for GitHub Actions), it falls back to a pull request.
-3. Otherwise a maintainer reviews the source at the tag and the permission summary, then merges.
-4. **Publish** (`.github/workflows/publish.yml`, on every merge to `main`) downloads the reviewed package again,
-   checks that its checksum and manifest are exactly the reviewed ones, signs it (`manifest.json` with the sha256 of
-   every file, `manifest.sig`), verifies the signature against the team key embedded in the core, repacks it
-   deterministically and releases it here as `<id>-<version>`. Then it rebuilds `catalog.json` from all reviewed
-   versions, signs it (`catalog.sig`), verifies it against `team.pub` and deploys both to GitHub Pages.
+1. The plugin's reusable SDK workflow builds and releases its package. `REGISTRY_TOKEN`, if configured, notifies this
+   repository immediately. Otherwise scheduled Sync checks every 15 minutes; GitHub can delay scheduled runs.
+2. Sync downloads, checks and validates the release, creates a version PR and explicitly dispatches both required
+   checks on that branch. Bot PRs no longer need to be closed and reopened to start CI.
+3. **Publish validated team updates** runs trusted code from `main` after CI/Check. It only merges same-repository
+   PRs created by `github-actions[bot]` on `sync/*`, changing exactly one existing team plugin version entry, with a
+   newer stable version and identical complete capabilities, visibility, platforms and dependencies. Both required
+   checks must pass on the exact head SHA. Labels and release descriptions never authorize a merge.
+4. First versions, community updates and any permission change remain a single reviewed PR. Permission reductions
+   are conservatively reviewed too. The automatic path never changes registry sources or workflow code.
+5. After an automatic merge the workflow explicitly dispatches Publish (`GITHUB_TOKEN` merges do not trigger push
+   workflows). Human merges trigger Publish normally. Signing, pinned checksums, catalog signatures and Pages remain
+   unchanged.
 
-Pull requests opened by the sync workflow use the workflow's `GITHUB_TOKEN`, and GitHub does not start other workflows
-for them. The sync job already ran every check; to run **Check** as well, close and reopen the pull request.
+### One-time repository rules
+
+Keep required checks **check** and **regtool (gofmt, go vet, go test)** enabled. Automatic merges use the registry's
+`GITHUB_TOKEN` and respect branch protection. If your rule requires a human approval for every PR, either allow a
+publishing identity to bypass that review for this automation, or set the repository secret `REGISTRY_MERGE_TOKEN`
+to a dedicated identity allowed by that rule (Contents, Pull requests and Actions write on this repository only).
+The workflow still performs its narrow policy and exact-commit checks before requesting a merge. Do not disable
+branch protection. If the rule refuses the merge, the validated PR stays open and the run reports a warning.
+
+The token is optional and never passed to a plugin repository or PR code. The default token suffices when rules only
+require the successful checks. GitHub Actions must be allowed to create PRs in this repository.
 
 ## Files
 
 | Path | What |
 |---|---|
 | `registry.json` | Categories of Browse and the plugin sources: `id`, `repo` (`owner/name`), `trust` (`team` or `community`), `category`, `featured`. |
-| `plugins/<id>.json` | The reviewed version: `version`, upstream `tag`, `asset`, `upstreamSha256`, short `notes` shown in Browse, and the reviewed part of the manifest (`name`, `author`, `description`, `entry`, `capabilities`, `contributes`, `visibleTo`). Changed only by pull requests. |
+| `plugins/<id>.json` | The reviewed version: `version`, upstream `tag`, `asset`, `upstreamSha256`, short `notes` shown in Browse, and the reviewed part of the manifest (`name`, `author`, `description`, `entry`, `capabilities`, `contributes`, `visibleTo`). Updated through validated pull requests. |
 | `CORE_REF` | The `Ervisio/ervisio` tag whose `plugin-sign` validates and signs packages. |
 | `team.pub` | The team public key. The catalog must verify against it. |
 | `tools/regtool` | Go tool (standard library only): checks the files, writes `plugins/<id>.json` and the pull request summary, builds, signs and verifies the catalog. |
@@ -87,7 +105,7 @@ curl -fsSLO https://ervisio.github.io/plugins/catalog.sig
 | Name | Where | What |
 |---|---|---|
 | `PLUGIN_SIGNING_KEY` | Repository secret | The team private key: the content of the key file written by `plugin-sign -genkey` (one line, base64 of the 64-byte ed25519 private key). Only the publish workflow reads it, writes it to a temporary file with mode 0600 and deletes it. |
-| `REGISTRY_TOKEN` | Organization secret (for the plugin repositories) | A fine-grained token with access to Ervisio/plugins only, permission "Contents: read and write" (needed for `repository_dispatch`). Plugin release workflows use it to start Sync at once. Without it Sync still runs every six hours. |
+| `REGISTRY_TOKEN` | Organization secret (for the plugin repositories) | A fine-grained token with access to Ervisio/plugins only, permission "Contents: read and write" (needed for `repository_dispatch`). Plugin release workflows use it to start Sync at once. Without it Sync still runs on its next scheduled scan (every 15 minutes). |
 
 A release maintainer sets it from the machine that holds the key (the command reads the file; the key never appears
 on the command line):
@@ -101,8 +119,7 @@ Until the secret exists, the publish workflow stops with "PLUGIN_SIGNING_KEY is 
 
 * Branch protection on `main`: require a pull request with one approving review, require the **Check** and **CI**
   checks, no force pushes. Signing happens only on `main`, so this is what keeps unreviewed code out of the catalog.
-  For automatic team updates, add **GitHub Actions** to the bypass list of that rule (rulesets: "Bypass list ›
-  Repository admin / GitHub Actions"); without it those updates become pull requests as before.
+  For automatic team updates, see the one-time repository rules above; version PRs remain validated even when a human review is required.
 * Pages: source "GitHub Actions" (Settings › Pages).
 * Actions: "Allow GitHub Actions to create and approve pull requests" (Settings › Actions › General), needed by the
   sync workflow.
@@ -128,3 +145,4 @@ Until the secret exists, the publish workflow stops with "PLUGIN_SIGNING_KEY is 
 ## License
 
 MIT, see [LICENSE](LICENSE).
+

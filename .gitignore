@@ -1,3 +1,5 @@
 /site/
 *.key
 /tools/regtool/regtool
+
+__pycache__/

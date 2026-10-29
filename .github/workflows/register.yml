@@ -1,0 +1,45 @@
+name: Register plugin
+on:
+  workflow_dispatch:
+    inputs:
+      id:
+        description: 'Plugin id from its manifest'
+        type: string
+        required: true
+      repo:
+        description: 'Public source repository (owner/name) with a published release'
+        type: string
+        required: true
+      category:
+        description: 'Marketplace category'
+        type: choice
+        options: [Containers, Security, Networking, Storage, Databases, Monitoring, 'Web servers', Games]
+        required: true
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+concurrency:
+  group: sync
+  cancel-in-progress: false
+jobs:
+  register:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: tools/regtool/go.mod
+          cache: false
+      - name: Validate and propose source plus first release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REGISTRY_REPO: ${{ github.repository }}
+          PLUGIN_ID: ${{ inputs.id }}
+          PLUGIN_REPO: ${{ inputs.repo }}
+          PLUGIN_CATEGORY: ${{ inputs.category }}
+        run: bash scripts/register.sh
