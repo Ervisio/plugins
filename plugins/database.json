@@ -1,11 +1,11 @@
 {
   "id": "database",
   "repo": "Ervisio/plugin-database",
-  "version": "1.2.1",
-  "tag": "v1.2.1",
-  "asset": "database-1.2.1.tar.gz",
-  "upstreamSha256": "c096837d5f58fd7e4719a41188cab4531ae4fa4cd259261c3c4bdd4df81b7530",
-  "notes": "Run CI manually instead of on every push and pull request Add one-command plugin release and marketplace registration (#4) Add MongoDB and Redis/Valkey drivers, Docker and local service discovery README: one-button releases One-button releases with the SDK's release workflow Add Windows support (SDK 0.3.0, platforms manifest, cross-platform bridge)",
+  "version": "1.2.2",
+  "tag": "v1.2.2",
+  "asset": "database-1.2.2.tar.gz",
+  "upstreamSha256": "ba55fb266b654cbfa14a67cd401378d49b2f8baa4ef00556dfc4bad37f2729b7",
+  "notes": "update",
   "manifest": {
     "name": "Databases",
     "author": "Ervisio Community",
