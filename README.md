@@ -49,7 +49,7 @@ package and opens **one PR containing `registry.json` plus `plugins/<id>.json`**
    repository immediately. Otherwise scheduled Sync checks every 15 minutes; GitHub can delay scheduled runs.
 2. Sync downloads, checks and validates the release, creates a version PR and explicitly dispatches both required
    checks on that branch. Bot PRs no longer need to be closed and reopened to start CI.
-3. **Publish validated team updates** runs trusted code from `main` after CI/Check. It only merges same-repository
+3. Sync waits for both required checks and directly calls the existing trusted merge policy, using the write permissions it already has. No additional event or CI write permission is needed. It only merges same-repository
    PRs created by `github-actions[bot]` on `sync/*`, changing exactly one existing team plugin version entry, with a
    newer stable version and identical complete capabilities, visibility, platforms and dependencies. Both required
    checks must pass on the exact head SHA. Labels and release descriptions never authorize a merge.

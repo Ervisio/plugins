@@ -38,6 +38,9 @@ sync_one() {
   if [ "${DRY_RUN:-}" != 1 ]; then
     if [ -n "$(gh pr list --repo "$REGISTRY_REPO" --state all --head "$branch" --json number --jq '.[].number')" ]; then
       note "$id $version: a pull request for $branch exists already"
+      if [ -n "$(gh pr list --repo "$REGISTRY_REPO" --state open --head "$branch" --json number --jq '.[].number')" ]; then
+        bash "$ROOT/scripts/finalize-update.sh" "$branch"
+      fi
       return 0
     fi
   fi
@@ -56,7 +59,7 @@ sync_one() {
     return 0
   fi
   # All updates use PRs so branch protection stays enabled. Trusted
-  # workflow_run automation merges routine team updates after both checks.
+  # Sync finalizes routine team updates after both required checks.
   git checkout -q -B "$branch" origin/main
   git add "plugins/$id.json"
   git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
@@ -82,6 +85,9 @@ sync_one() {
   # explicitly on the generated branch, including PRs requiring manual review.
   gh workflow run ci.yml --repo "$REGISTRY_REPO" --ref "$branch"
   gh workflow run check.yml --repo "$REGISTRY_REPO" --ref "$branch" -f "base=$(git rev-parse origin/main)"
+  if [ "$trust" = team ] && [ -n "$current" ]; then
+    bash "$ROOT/scripts/finalize-update.sh" "$branch"
+  fi
   git checkout -q main
 }
 
