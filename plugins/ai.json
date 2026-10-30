@@ -1,0 +1,172 @@
+{
+  "id": "ai",
+  "repo": "Ervisio/plugin-ai",
+  "version": "0.1.1",
+  "tag": "v0.1.1",
+  "asset": "ai-0.1.1.tar.gz",
+  "upstreamSha256": "00708b4e931738ab2548b47569e9ad9843b73b44ece9edeb417b614d39d4ec1a",
+  "notes": "Fix the provider network permissions for marketplace installation. Includes the AI chat, MCP server, server-management tools and automatic client connector.",
+  "manifest": {
+    "name": "AI",
+    "author": "Ervisio Community",
+    "description": "Chat with your own API key, or turn this machine into an MCP server that Claude Code, Codex, Cursor, Kilo Code, Antigravity and other tools use from your computer. Full control of the shell, files, services, Docker and Ervisio itself.",
+    "homepage": "https://github.com/Ervisio/plugin-ai",
+    "icon": "zap",
+    "color": "ov",
+    "entry": "index.js",
+    "capabilities": {
+      "commands": [
+        {
+          "args": [
+            {
+              "maxLen": 32,
+              "pattern": "[a-f0-9]{32}"
+            }
+          ],
+          "argv": [
+            "python3",
+            "-B",
+            "/var/lib/ervisio/plugins/ai/engine",
+            "call",
+            "{0}"
+          ],
+          "description": "Run one AI tool call (a request file the chat page wrote) as your own user",
+          "name": "ai-call",
+          "timeoutSec": 600
+        },
+        {
+          "admin": true,
+          "args": [
+            {
+              "maxLen": 32,
+              "pattern": "[a-f0-9]{32}"
+            }
+          ],
+          "argv": [
+            "python3",
+            "-B",
+            "/var/lib/ervisio/plugins/ai/engine",
+            "call",
+            "{0}"
+          ],
+          "description": "Run one AI tool call as root (needs administrator rights)",
+          "name": "ai-root-call",
+          "timeoutSec": 600
+        },
+        {
+          "args": [
+            {
+              "maxLen": 32,
+              "pattern": "[a-f0-9]{32}"
+            }
+          ],
+          "argv": [
+            "python3",
+            "-B",
+            "/var/lib/ervisio/plugins/ai/engine",
+            "ctl",
+            "{0}"
+          ],
+          "description": "Read the state of the AI server (status, checks, connection details) as your own user",
+          "name": "ai-ctl",
+          "timeoutSec": 60
+        },
+        {
+          "admin": true,
+          "args": [
+            {
+              "maxLen": 32,
+              "pattern": "[a-f0-9]{32}"
+            }
+          ],
+          "argv": [
+            "python3",
+            "-B",
+            "/var/lib/ervisio/plugins/ai/engine",
+            "ctl",
+            "{0}"
+          ],
+          "description": "Install, start, stop and configure the headless AI server, its tokens and its safety policy (needs administrator rights)",
+          "name": "ai-root-ctl",
+          "timeoutSec": 300
+        },
+        {
+          "args": [
+            {
+              "maxLen": 16,
+              "pattern": "tools|whoami|version"
+            }
+          ],
+          "argv": [
+            "python3",
+            "-B",
+            "/var/lib/ervisio/plugins/ai/engine",
+            "{0}"
+          ],
+          "description": "List the AI tools, or say who the engine runs as",
+          "name": "ai-info",
+          "timeoutSec": 20
+        }
+      ],
+      "files": {
+        "write": [
+          {
+            "create": true,
+            "path": "~/.config/ervisio/plugins/ai"
+          },
+          {
+            "admin": true,
+            "create": true,
+            "path": "/var/lib/ervisio-ai/spool"
+          }
+        ]
+      },
+      "network": [
+        "api.anthropic.com",
+        "api.openai.com",
+        "openrouter.ai",
+        "generativelanguage.googleapis.com",
+        "api.groq.com",
+        "api.deepseek.com",
+        "api.mistral.ai",
+        "api.x.ai"
+      ],
+      "userHosts": true
+    },
+    "contributes": {
+      "pages": [
+        {
+          "icon": "zap",
+          "id": "ai",
+          "title": "AI"
+        }
+      ],
+      "snippets": [
+        {
+          "command": "ervisio-ai status",
+          "name": "AI server status"
+        },
+        {
+          "command": "ervisio-ai doctor",
+          "name": "AI server checks"
+        },
+        {
+          "command": "ervisio-ai audit --limit 30",
+          "name": "What the AI did"
+        },
+        {
+          "command": "tmux -S /var/lib/ervisio-ai/tmux.sock attach",
+          "name": "Watch the AI's terminals"
+        }
+      ]
+    },
+    "visibleTo": {
+      "groups": [
+        "sudo",
+        "wheel",
+        "admin"
+      ]
+    },
+    "minCore": "0.5.0"
+  }
+}

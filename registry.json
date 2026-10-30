@@ -15,6 +15,7 @@
     {"id": "caddy", "repo": "Ervisio/plugin-caddy", "trust": "team", "category": "Web servers"},
     {"id": "minecraft", "repo": "Ervisio/plugin-minecraft", "trust": "team", "category": "Games"},
     {"id": "firewall", "repo": "Ervisio/plugin-firewall", "trust": "team", "category": "Security"},
-    {"id": "drive", "repo": "Ervisio/ErvisioDrive", "trust": "team", "category": "Storage"}
+    {"id": "drive", "repo": "Ervisio/ErvisioDrive", "trust": "team", "category": "Storage"},
+    {"id": "ai", "repo": "Ervisio/plugin-ai", "trust": "team", "category": "Monitoring"}
   ]
 }
