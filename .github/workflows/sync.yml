@@ -19,6 +19,7 @@ permissions:
   contents: write
   pull-requests: write
   actions: write   # dispatches the required checks for bot-generated PRs
+  statuses: write  # report successful exact-head validation to PR-required contexts
 
 concurrency:
   group: sync
