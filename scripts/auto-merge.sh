@@ -24,12 +24,22 @@ while read -r -u 3 number; do
     gh workflow run check.yml --repo "$GITHUB_REPOSITORY" --ref "$branch" -f "base=$base"
     continue
   fi
-  checks="$(gh api "repos/$GITHUB_REPOSITORY/commits/$HEAD_SHA/check-runs" --paginate --jq '.check_runs[] | [.name, .status, .conclusion, (.app.id|tostring)] | @tsv')"
+  checks="$(gh api "repos/$GITHUB_REPOSITORY/commits/$HEAD_SHA/check-runs" --paginate --jq '.check_runs[] | [.name, .status, .conclusion, (.app.id|tostring), .html_url] | @tsv')"
   # Both required checks must have completed successfully on this exact head.
   for name in check 'regtool (gofmt, go vet, go test)'; do
     if ! awk -F '\t' -v name="$name" '$1==name && $4=="15368" {seen=1; if ($2!="completed" || $3!="success") bad=1} END {exit (!seen || bad)}' <<< "$checks"; then
       echo "PR #$number: waiting for $name"; continue 2
     fi
+  done
+  # workflow_dispatch checks are not attached to the bot-created PR.
+  # Report their successful results as commit statuses, only after all of
+  # the exact-head checks and the trusted policy above have passed.
+  for name in check 'regtool (gofmt, go vet, go test)'; do
+    target="$(awk -F '\t' -v name="$name" '$1==name && $4=="15368" {print $5; exit}' <<< "$checks")"
+    [ -n "$target" ] || target="https://github.com/$GITHUB_REPOSITORY/commit/$HEAD_SHA/checks"
+    gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$HEAD_SHA" \
+      -f state=success -f "context=$name" -f "target_url=$target" \
+      -f description="Registry validation passed on this exact commit" >/dev/null
   done
   if gh api --method PUT "repos/$GITHUB_REPOSITORY/pulls/$number/merge" \
       -f sha="$HEAD_SHA" -f merge_method=squash --jq .merged | grep -qx true; then
