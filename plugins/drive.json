@@ -1,11 +1,11 @@
 {
   "id": "drive",
   "repo": "Ervisio/ErvisioDrive",
-  "version": "0.4.0",
-  "tag": "v0.4.0",
-  "asset": "drive-0.4.0.tar.gz",
-  "upstreamSha256": "3e23561cf1ed61ed8344916d2442d8bb76f62a2f7fdec2048e64774e95b20207",
-  "notes": "Update the drive from the plugin: when the drive is older, a strip under the header offers the update, then shows its log until the drive runs again (new admin command `update`). The drive reports its version to the plugin.",
+  "version": "0.5.0",
+  "tag": "v0.5.0",
+  "asset": "drive-0.5.0.tar.gz",
+  "upstreamSha256": "e1835875b44f74860f5b18e7e8e12a5e18f6aa79ce36117cc8f68ba9bfea0aa1",
+  "notes": "Download entire folders as streaming ZIP64 archives, preserving subfolders, empty directories, file permissions and decryption. Remove folder shortcuts from the main left sidebar while keeping folder navigation inside the Drive.",
   "manifest": {
     "name": "ErvisioDrive",
     "author": "Riccardo Reccia",
