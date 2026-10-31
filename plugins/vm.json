@@ -1,0 +1,184 @@
+{
+  "id": "vm",
+  "repo": "Ervisio/plugin-vm",
+  "version": "0.1.0",
+  "tag": "v0.1.0",
+  "asset": "vm-0.1.0.tar.gz",
+  "upstreamSha256": "513e5b940badbe58e5213c329de1fc9ae57746bc452135e972217d0b5dc932e6",
+  "notes": "First marketplace preview of the KVM/QEMU virtual machine manager, graphical and serial consoles. Manage VM creation, storage, networking, snapshots and host prerequisite diagnostics. Author: Ervisio team. Real KVM host compatibility still requires validation as documented in the README.",
+  "manifest": {
+    "name": "Virtual Machines",
+    "author": "Ervisio team",
+    "description": "Create, manage and access KVM/QEMU virtual machines directly from Ervisio: Linux and Windows installers, cloud images, VNC, serial consoles, storage, snapshots, networking, GPU readiness and passthrough.",
+    "icon": "server",
+    "color": "term",
+    "entry": "index.js",
+    "capabilities": {
+      "commands": [
+        {
+          "name": "vm-host-check",
+          "description": "Diagnose virtualization support, nested KVM, CPU flags and prerequisites",
+          "platforms": [
+            "linux"
+          ],
+          "admin": true,
+          "argv": [
+            "python3",
+            "-B",
+            "/var/lib/ervisio/plugins/vm/vm_engine.py",
+            "host"
+          ],
+          "timeoutSec": 20
+        },
+        {
+          "name": "vm-runtime-install",
+          "description": "Install KVM/QEMU, libvirt and the root-only VM service on Linux",
+          "admin": true,
+          "platforms": [
+            "linux"
+          ],
+          "argv": [
+            "python3",
+            "-B",
+            "/var/lib/ervisio/plugins/vm/vm_service.py",
+            "install"
+          ],
+          "timeoutSec": 600
+        }
+      ],
+      "http": [
+        {
+          "name": "vm-control",
+          "socket": "/run/ervisio-vm/control.sock",
+          "admin": true,
+          "platforms": [
+            "linux"
+          ],
+          "maxBody": 65536,
+          "maxUpload": 15032385536,
+          "timeoutSec": 60,
+          "headers": [
+            "X-VM-Token"
+          ],
+          "rules": [
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1/status"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1/health"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1/stream"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1/vms/[a-z][a-z0-9-]{1,47}/snapshots"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1/input"
+            },
+            {
+              "methods": [
+                "POST",
+                "DELETE"
+              ],
+              "path": "/v1/console"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1/vms"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1/images/download"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1/images/upload"
+            },
+            {
+              "methods": [
+                "DELETE"
+              ],
+              "path": "/v1/images/[A-Za-z0-9_.-]{1,120}"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1/vms/[a-z][a-z0-9-]{1,47}/(power|resources|grow|disk|snapshot|delete|gpu|physical|eject)"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1/network"
+            }
+          ]
+        }
+      ]
+    },
+    "contributes": {
+      "pages": [
+        {
+          "id": "vm",
+          "title": "Virtual Machines",
+          "icon": "server"
+        }
+      ],
+      "widgets": [
+        {
+          "id": "vm-overview",
+          "title": "VM Overview",
+          "icon": "server"
+        }
+      ],
+      "snippets": [
+        {
+          "name": "Virtual machines",
+          "command": "virsh -c qemu:///system list --all"
+        },
+        {
+          "name": "KVM support",
+          "command": "ls -l /dev/kvm"
+        },
+        {
+          "name": "Libvirt networks",
+          "command": "virsh -c qemu:///system net-list --all"
+        }
+      ]
+    },
+    "visibleTo": {
+      "groups": [
+        "sudo",
+        "wheel",
+        "admin"
+      ]
+    },
+    "minCore": "0.6.2",
+    "platforms": [
+      "linux",
+      "windows"
+    ]
+  }
+}

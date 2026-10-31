@@ -1,0 +1,112 @@
+{
+  "id": "robots",
+  "repo": "Ervisio/plugin-robots",
+  "version": "0.1.0",
+  "tag": "v0.1.0",
+  "asset": "robots-0.1.0.tar.gz",
+  "upstreamSha256": "7da20325f6ac546adce20644e0276ee38d9341c96b542e7d52cf56e072acda8f",
+  "notes": "First community marketplace alpha of Browser Robots: a remote Chromium browser with recorded and replayable workflows. Include the companion Playwright runtime and preserve secret placeholders in recorded workflows. Package the documented plugin directory. Author: Ervisio Community.",
+  "manifest": {
+    "name": "Browser Robots",
+    "author": "Ervisio Community",
+    "description": "Open a real Chromium browser inside Ervisio, automate interactions, record workflows and replay them with Playwright.",
+    "icon": "globe",
+    "color": "term",
+    "entry": "index.js",
+    "capabilities": {
+      "http": [
+        {
+          "name": "robots",
+          "socket": "/run/ervisio-browser-robots/control.sock",
+          "admin": true,
+          "headers": [
+            "Content-Type"
+          ],
+          "maxBody": 131072,
+          "timeoutSec": 60,
+          "rules": [
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1/health"
+            },
+            {
+              "methods": [
+                "GET",
+                "POST"
+              ],
+              "path": "/v1/sessions"
+            },
+            {
+              "methods": [
+                "DELETE"
+              ],
+              "path": "/v1/sessions/[a-f0-9]{14}"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1/sessions/[a-f0-9]{14}/frame"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1/sessions/[a-f0-9]{14}/(navigate|action|record)"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1/workflows"
+            },
+            {
+              "methods": [
+                "GET",
+                "DELETE"
+              ],
+              "path": "/v1/workflows/[a-f0-9]{14}"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1/workflows/[a-f0-9]{14}/run"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1/runs/[a-f0-9]{14}"
+            }
+          ]
+        }
+      ],
+      "sockets": [
+        "/run/ervisio-browser-robots/control.sock"
+      ]
+    },
+    "contributes": {
+      "pages": [
+        {
+          "id": "robots",
+          "title": "Browser Robots",
+          "icon": "globe"
+        }
+      ]
+    },
+    "visibleTo": {
+      "groups": [
+        "sudo",
+        "wheel",
+        "admin"
+      ]
+    },
+    "minCore": "0.5.0",
+    "platforms": [
+      "linux"
+    ]
+  }
+}

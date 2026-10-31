@@ -16,6 +16,10 @@
     {"id": "minecraft", "repo": "Ervisio/plugin-minecraft", "trust": "team", "category": "Games"},
     {"id": "firewall", "repo": "Ervisio/plugin-firewall", "trust": "team", "category": "Security"},
     {"id": "drive", "repo": "Ervisio/ErvisioDrive", "trust": "team", "category": "Storage"},
-    {"id": "ai", "repo": "Ervisio/plugin-ai", "trust": "team", "category": "Monitoring"}
+    {"id": "ai", "repo": "Ervisio/plugin-ai", "trust": "team", "category": "Monitoring"},
+    {"id": "desktop", "repo": "Ervisio/plugin-desktop", "trust": "team", "category": "Monitoring"},
+    {"id": "apphost", "repo": "Ervisio/plugin-apphost", "trust": "community", "category": "Web servers"},
+    {"id": "robots", "repo": "Ervisio/plugin-robots", "trust": "community", "category": "Monitoring"},
+    {"id": "vm", "repo": "Ervisio/plugin-vm", "trust": "team", "category": "Containers"}
   ]
 }
