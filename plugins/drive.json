@@ -1,11 +1,11 @@
 {
   "id": "drive",
   "repo": "Ervisio/ErvisioDrive",
-  "version": "0.5.1",
-  "tag": "v0.5.1",
-  "asset": "drive-0.5.1.tar.gz",
-  "upstreamSha256": "28b1ef664e3288f6d2f37516e8eebab58ebae2982fbcebe9842f52191d46cd5a",
-  "notes": "Recognize existing Docker Drive installations without PLUGIN_SOCKET and with renamed services or containers. Offer an update to connect legacy installations instead of prompting for a fresh install; preserve the existing Compose folder and skip auxiliary or disappearing containers.",
+  "version": "0.5.2",
+  "tag": "v0.5.2",
+  "asset": "drive-0.5.2.tar.gz",
+  "upstreamSha256": "8ea3ae38507988727758cce4bdef3fc506753cc4001358257633f9e08c4a41a5",
+  "notes": "Preserve Docker discovery when the Drive socket is missing or refuses connections. Show the existing container and actual connection error, offer an update, and never offer a fresh installation when discovery could not complete. Add regression coverage for the running 0.4.0 container with ENOENT.",
   "manifest": {
     "name": "ErvisioDrive",
     "author": "Riccardo Reccia",
