@@ -1,11 +1,11 @@
 {
   "id": "ervisio-logs",
   "repo": "Ervisio/ErvisioLogs",
-  "version": "0.1.2",
-  "tag": "v0.1.2",
-  "asset": "ervisio-logs-0.1.2.tar.gz",
-  "upstreamSha256": "7e322d25d596c10f0dfe65800d4f09a09dee3131870f132125b80aff58162954",
-  "notes": "Off-site archive on an SFTP server with a password, such as a Hetzner Storage Box. > **Not tried on a host.** The changes passed `go build`, `go vet`, type checks, the plugin and web builds and > `docker compose config`. No SFTP server was reached with them and the plugin was not loaded in Ervisio. Try it on a > test server first. | File | Use | |---|---| | `ervisio-logs-0.1.2-linux-amd64.tar.gz`, `-linux-arm64.tar.gz` | Standalone: binary with the web UI, systemd unit, `install.sh` | | `ervi...",
+  "version": "0.1.4",
+  "tag": "v0.1.4",
+  "asset": "ervisio-logs-0.1.4.tar.gz",
+  "upstreamSha256": "605ceaca02bc66dd9221bf525c90fa2399b2aeea67c58ec7435d940e5b8a409a",
+  "notes": "Type archive credentials in the Storage page, or load them from a file on your computer. > **Not tried on a host.** The change passed `go build`, `go vet`, type checks and the web build. Try it on a test > server first. | File | Use | |---|---| | `ervisio-logs-0.1.4-linux-amd64.tar.gz`, `-linux-arm64.tar.gz` | Standalone: binary with the web UI, systemd unit, `install.sh` | | `ervisio-logs-0.1.4-docker.tar.gz` | Docker Compose bundle, from `ghcr.io/ervisio/ervisio-logs:0.1.4` | | `ervisio-log...",
   "manifest": {
     "name": "Ervisio Logs",
     "author": "Ervisio team",
@@ -407,12 +407,12 @@
         },
         {
           "name": "standalone-secrets-init",
-          "description": "Create /etc/ervisio-logs/secrets for archive credentials, readable by the ervisio-logs service",
+          "description": "Create /etc/ervisio-logs/secrets for archive credentials, readable and writable by the ervisio-logs service",
           "argv": [
             "install",
             "-d",
             "-m",
-            "2750",
+            "2770",
             "-o",
             "root",
             "-g",
