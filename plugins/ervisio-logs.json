@@ -1,15 +1,15 @@
 {
   "id": "ervisio-logs",
   "repo": "Ervisio/ErvisioLogs",
-  "version": "0.1.0",
-  "tag": "v0.1.0",
-  "asset": "ervisio-logs-0.1.0.tar.gz",
-  "upstreamSha256": "8fe6b991ccc70ec88428e25c211fa76a6cf9897a7d8e894897c079bcb16489fd",
-  "notes": "First release of Ervisio Logs: self-hosted, multi-tenant log management with a hot ClickHouse tier and Parquet archives in S3-compatible storage. > **First release, not yet tried on a real host.** CI passed the unit, integration, browser end-to-end and smoke tests > on the Docker stack built from source. No package from this page has been installed on a server yet, and the > Ervisio plugin has not been loaded in Ervisio. Try it on a test server first. | File | Use | |---|---| | `ervisio-logs-...",
+  "version": "0.1.1",
+  "tag": "v0.1.1",
+  "asset": "ervisio-logs-0.1.1.tar.gz",
+  "upstreamSha256": "8aa658a8a38a2d38ed8d7e07136858a6878303daf21499758b058413b39c9990",
+  "notes": "Fixes for the Ervisio plugin and production mode in Docker, after the first try on a real server. > **Not tried on a host.** The changes passed type checks, a plugin build, `go build`, `go vet` and > `docker compose config`. No stack was started with them and the plugin was not loaded in Ervisio. Try it on a test > server first. | File | Use | |---|---| | `ervisio-logs-0.1.1-linux-amd64.tar.gz`, `-linux-arm64.tar.gz` | Standalone: binary with the web UI, systemd unit, `install.sh` | | `ervisi...",
   "manifest": {
     "name": "Ervisio Logs",
     "author": "Ervisio team",
-    "description": "Install and run Ervisio Logs on this server, as a Docker Compose stack (shown in the Docker plugin) or as a systemd service. Data is never deleted by the plugin.",
+    "description": "Install and run Ervisio Logs on this server, as a Docker Compose stack (shown in the Docker plugin) or as a systemd service, and publish it through the Caddy you already run. Data is never deleted by the plugin.",
     "homepage": "https://github.com/Ervisio/ErvisioLogs",
     "icon": "server",
     "color": "log",
@@ -278,6 +278,81 @@
           "admin": true,
           "adminUnlessGroup": "systemd-journal",
           "timeoutSec": 30
+        },
+        {
+          "name": "service-show",
+          "description": "Read the state of caddy.service, to find the Caddy that serves this machine",
+          "argv": [
+            "systemctl",
+            "show",
+            "caddy.service",
+            "--no-pager",
+            "--property=LoadState,ActiveState,SubState,ExecStart,FragmentPath,UnitFileState"
+          ],
+          "timeoutSec": 15
+        },
+        {
+          "name": "validate",
+          "description": "Check a Caddyfile with caddy validate (in a scratch data folder, so nothing in Caddy's storage changes)",
+          "argv": [
+            "env",
+            "HOME=/run/ervisio-logs-caddy",
+            "XDG_DATA_HOME=/run/ervisio-logs-caddy/data",
+            "XDG_CONFIG_HOME=/run/ervisio-logs-caddy/config",
+            "caddy",
+            "validate",
+            "--config",
+            "{0}",
+            "--adapter",
+            "caddyfile"
+          ],
+          "args": [
+            {
+              "pattern": "/etc/caddy/[A-Za-z0-9._-]{1,100}(/[A-Za-z0-9._-]{1,100})?",
+              "maxLen": 220
+            }
+          ],
+          "admin": true,
+          "timeoutSec": 60
+        },
+        {
+          "name": "reload",
+          "description": "Reload caddy.service after the Ervisio Logs site was added or removed",
+          "argv": [
+            "systemctl",
+            "reload",
+            "caddy.service"
+          ],
+          "admin": true,
+          "timeoutSec": 120
+        },
+        {
+          "name": "has-docker",
+          "description": "Check whether Docker is installed",
+          "argv": [
+            "test",
+            "-S",
+            "/var/run/docker.sock"
+          ],
+          "timeoutSec": 10
+        },
+        {
+          "name": "user",
+          "description": "Read your user name (to know if you can use Docker)",
+          "argv": [
+            "id",
+            "-un"
+          ],
+          "timeoutSec": 10
+        },
+        {
+          "name": "groups",
+          "description": "Read your groups (to know if you can use Docker)",
+          "argv": [
+            "id",
+            "-Gn"
+          ],
+          "timeoutSec": 10
         }
       ],
       "files": {
@@ -290,7 +365,8 @@
           {
             "path": "/etc/ervisio-logs",
             "admin": true
-          }
+          },
+          "/etc/caddy"
         ],
         "write": [
           {
@@ -303,11 +379,75 @@
             "admin": true
           },
           {
+            "path": "/etc/caddy",
+            "admin": true
+          },
+          {
             "path": "~/.config/ervisio/plugins/ervisio-logs",
             "create": true
           }
         ]
-      }
+      },
+      "http": [
+        {
+          "name": "docker",
+          "socket": "/var/run/docker.sock",
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "headers": [
+            "Content-Type"
+          ],
+          "maxBody": 8388608,
+          "timeoutSec": 120,
+          "rules": [
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/version"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1\\.[0-9]+/containers/json"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1\\.[0-9]+/containers/[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}/json"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1\\.[0-9]+/containers/[a-zA-Z0-9][a-zA-Z0-9_.-]{0,127}/(start|exec)"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1\\.[0-9]+/exec/[a-f0-9]{64}/start"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1\\.[0-9]+/exec/[a-f0-9]{64}/json"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1\\.[0-9]+/networks/ervisiologs_edge/connect"
+            }
+          ]
+        }
+      ],
+      "sockets": [
+        "/var/run/docker.sock"
+      ]
     },
     "contributes": {
       "pages": [
