@@ -1,11 +1,11 @@
 {
   "id": "ervisio-logs",
   "repo": "Ervisio/ErvisioLogs",
-  "version": "0.1.4",
-  "tag": "v0.1.4",
-  "asset": "ervisio-logs-0.1.4.tar.gz",
-  "upstreamSha256": "605ceaca02bc66dd9221bf525c90fa2399b2aeea67c58ec7435d940e5b8a409a",
-  "notes": "Type archive credentials in the Storage page, or load them from a file on your computer. > **Not tried on a host.** The change passed `go build`, `go vet`, type checks and the web build. Try it on a test > server first. | File | Use | |---|---| | `ervisio-logs-0.1.4-linux-amd64.tar.gz`, `-linux-arm64.tar.gz` | Standalone: binary with the web UI, systemd unit, `install.sh` | | `ervisio-logs-0.1.4-docker.tar.gz` | Docker Compose bundle, from `ghcr.io/ervisio/ervisio-logs:0.1.4` | | `ervisio-log...",
+  "version": "0.1.5",
+  "tag": "v0.1.5",
+  "asset": "ervisio-logs-0.1.5.tar.gz",
+  "upstreamSha256": "251c9eed02c4d58af81056828661065a944eb49dac0aac4be424fe384973efb2",
+  "notes": "Documentation is now available inside the app, in English and Italian. **Documentation** in the main navigation and command palette, available to all signed-in users, including users without a workspace or project. Articles have stable `/docs/<topic>` addresses. Nine searchable guides: getting started, JSON ingest API, search and live logs, tokens and permissions, storage and retention (S3, SFTP / Storage Box and local folders), FiveM, alerts and webhooks, deployment and troubleshooting. Copy...",
   "manifest": {
     "name": "Ervisio Logs",
     "author": "Ervisio team",
