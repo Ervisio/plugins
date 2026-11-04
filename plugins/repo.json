@@ -1,11 +1,11 @@
 {
   "id": "repo",
   "repo": "Ervisio/ErvisioRepo",
-  "version": "1.0.4",
-  "tag": "v1.0.4",
-  "asset": "repo-1.0.4.tar.gz",
-  "upstreamSha256": "23a52bde2f5749c4ab12a0c800e83a8105ca31e230692bb075a2516862a55711",
-  "notes": "Plugin: new layout with an overview (service, repositories, space, runners, containers, access), a maintenance page (update to the plugin's version, start, stop, restart, configuration check, live logs) and settings pages for access, mail, Git and SSH, Actions, webhooks, logs and address. Plugin API: every common setting is editable (`GET`/`PUT /api/plugin/settings` with flat `section.key` values and per-field 422 errors), `POST /api/plugin/config/check`, `POST /api/plugin/mail/test`, `POST /...",
+  "version": "1.0.5",
+  "tag": "v1.0.5",
+  "asset": "repo-1.0.5.tar.gz",
+  "upstreamSha256": "86e5f211dc05401e58925204a05c8dee4ab2312904ee5cce515a0d0523ff95fc",
+  "notes": "Plugin: the page failed to load with \"React is not ready\" because the settings context was created at import time, before `activate()` set React. Docker image: `ghcr.io/ervisio/ervisio-repo:1.0.5` (linux/amd64, linux/arm64). `SHA256SUMS.sig` is an ed25519 signature checked by `install.sh`.",
   "manifest": {
     "name": "ErvisioRepo",
     "author": "Riccardo Reccia",
