@@ -1,0 +1,270 @@
+{
+  "id": "todo",
+  "repo": "Ervisio/ErvisioTodo",
+  "version": "0.3.0",
+  "tag": "v0.3.0",
+  "asset": "todo-0.3.0.tar.gz",
+  "upstreamSha256": "7939a08a8a4daa4615a3eff43ae95258a36bd10d29c5104f9927b54d4db26356",
+  "notes": "First version: install ErvisioTodo with Docker, start, stop, restart, live logs, updates, workspace settings, test email and a usage widget.",
+  "manifest": {
+    "name": "ErvisioTodo",
+    "author": "Riccardo Reccia",
+    "description": "Install, run and update ErvisioTodo on this machine with Docker: workspace settings, mail test, live logs and updates.",
+    "icon": "list",
+    "color": "term",
+    "entry": "index.js",
+    "capabilities": {
+      "commands": [
+        {
+          "name": "has-docker",
+          "argv": [
+            "test",
+            "-S",
+            "/var/run/docker.sock"
+          ],
+          "description": "Check whether Docker is installed (to find the ErvisioTodo containers, and before installing)"
+        },
+        {
+          "name": "user",
+          "argv": [
+            "id",
+            "-un"
+          ],
+          "description": "Read your user name (root uses Docker without an unlock prompt)"
+        },
+        {
+          "name": "groups",
+          "argv": [
+            "id",
+            "-Gn"
+          ],
+          "description": "Read your groups (members of docker use Docker without an unlock prompt)"
+        },
+        {
+          "name": "install-docker",
+          "admin": true,
+          "timeoutSec": 60,
+          "args": [
+            {
+              "maxLen": 11,
+              "pattern": "[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}"
+            },
+            {
+              "maxLen": 200,
+              "pattern": "https?://[A-Za-z0-9.-]{1,150}(:[0-9]{1,5})?"
+            }
+          ],
+          "argv": [
+            "sh",
+            "-c",
+            "systemctl stop ervisio-todo-install.service 2>/dev/null; systemctl reset-failed ervisio-todo-install.service 2>/dev/null; exec systemd-run --unit=ervisio-todo-install --description='Install ErvisioTodo (Docker)' --remain-after-exit --setenv=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin sh -c \"$0\" install-docker \"$1\" \"$2\"",
+            "set -eu\nv=\"$1\"; url=\"$2\"; d=/opt/ervisio-todo\ncommand -v docker >/dev/null || { echo \"Docker is not installed\"; exit 1; }\nif [ ! -f \"$d/deploy/ervisio-setup.sh\" ]; then\n  mkdir -p \"$d\"\n  u=\"https://github.com/Ervisio/ErvisioTodo/archive/refs/tags/v$v.tar.gz\"\n  echo \"Downloading $u\"\n  if command -v curl >/dev/null; then curl -fsSL \"$u\"; else wget -qO- \"$u\"; fi | tar -xz --strip-components=1 -C \"$d\"\nfi\ncd \"$d\" && exec ./deploy/ervisio-setup.sh --url \"$url\"",
+            "{0}",
+            "{1}"
+          ],
+          "description": "Install ErvisioTodo with Docker in /opt/ervisio-todo: download the release matching this plugin from GitHub and run deploy/ervisio-setup.sh in a systemd unit (ervisio-todo-install), which starts the Docker Compose stack"
+        },
+        {
+          "name": "install-state",
+          "argv": [
+            "systemctl",
+            "show",
+            "ervisio-todo-install.service",
+            "--no-pager",
+            "--property=LoadState,ActiveState,SubState,Result,InvocationID,Description"
+          ],
+          "description": "Read the state of the installation unit (ervisio-todo-install)"
+        },
+        {
+          "name": "install-log",
+          "admin": true,
+          "args": [
+            {
+              "maxLen": 32,
+              "pattern": "[a-f0-9]{32}"
+            }
+          ],
+          "argv": [
+            "sh",
+            "-c",
+            "exec journalctl _SYSTEMD_INVOCATION_ID=\"$1\" -o cat --no-pager -n 400",
+            "log",
+            "{0}"
+          ],
+          "timeoutSec": 30,
+          "description": "Read the output of the installation (the journal of ervisio-todo-install)"
+        },
+        {
+          "name": "update-docker",
+          "admin": true,
+          "timeoutSec": 60,
+          "args": [
+            {
+              "maxLen": 11,
+              "pattern": "[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}"
+            }
+          ],
+          "argv": [
+            "sh",
+            "-c",
+            "systemctl stop ervisio-todo-update.service 2>/dev/null; systemctl reset-failed ervisio-todo-update.service 2>/dev/null; exec systemd-run --unit=ervisio-todo-update --description='Update ErvisioTodo (Docker)' --remain-after-exit --setenv=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin sh -c \"$0\" update-docker \"$1\"",
+            "set -eu\nv=\"$1\"; d=/opt/ervisio-todo\n[ -f \"$d/compose.yaml\" ] || { echo \"No Docker installation in $d\"; exit 1; }\ncd \"$d\"\nts=$(date +%Y%m%d-%H%M%S)\necho \"==> backup\"\nif [ -f .env ]; then cp -p .env \".env.bak-$ts\"; echo \"Saved $d/.env.bak-$ts\"; else echo \"No .env to back up\"; fi\necho \"Data stays in the Docker volume ervisiotodo_todo-data: the update does not touch it\"\ntouch .env\nif grep -q '^ERVISIO_VERSION=' .env; then sed -i \"s/^ERVISIO_VERSION=.*/ERVISIO_VERSION=$v/\" .env; else echo \"ERVISIO_VERSION=$v\" >> .env; fi\necho \"Set ERVISIO_VERSION=$v in $d/.env\"\necho \"==> pull\"\ndocker compose pull app\necho \"==> up\"\ndocker compose up -d\necho \"==> done\"",
+            "{0}"
+          ],
+          "description": "Update the Docker installation in /opt/ervisio-todo to a release, in a systemd unit (ervisio-todo-update): back up .env next to itself, set ERVISIO_VERSION in .env, docker compose pull app, docker compose up -d"
+        },
+        {
+          "name": "update-state",
+          "argv": [
+            "systemctl",
+            "show",
+            "ervisio-todo-update.service",
+            "--no-pager",
+            "--property=LoadState,ActiveState,SubState,Result,InvocationID,Description"
+          ],
+          "description": "Read the state of the update unit (ervisio-todo-update)"
+        },
+        {
+          "name": "update-log",
+          "admin": true,
+          "args": [
+            {
+              "maxLen": 32,
+              "pattern": "[a-f0-9]{32}"
+            }
+          ],
+          "argv": [
+            "sh",
+            "-c",
+            "exec journalctl _SYSTEMD_INVOCATION_ID=\"$1\" -o cat --no-pager -n 400",
+            "log",
+            "{0}"
+          ],
+          "timeoutSec": 30,
+          "description": "Read the output of the update (the journal of ervisio-todo-update)"
+        }
+      ],
+      "http": [
+        {
+          "name": "todo",
+          "admin": true,
+          "headers": [
+            "Content-Type"
+          ],
+          "maxBody": 1048576,
+          "timeoutSec": 60,
+          "socket": "/run/ervisio-todo/api.sock",
+          "rules": [
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/api/plugin/(status|settings)"
+            },
+            {
+              "methods": [
+                "PUT"
+              ],
+              "path": "/api/plugin/settings"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/api/plugin/mail/test"
+            }
+          ]
+        },
+        {
+          "name": "todo-user",
+          "headers": [],
+          "maxBody": 1048576,
+          "timeoutSec": 15,
+          "socket": "/run/ervisio-todo/api.sock",
+          "rules": [
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/api/plugin/status"
+            }
+          ]
+        },
+        {
+          "name": "docker",
+          "admin": true,
+          "adminUnlessGroup": "docker",
+          "headers": [
+            "Content-Type"
+          ],
+          "maxBody": 8388608,
+          "timeoutSec": 120,
+          "socket": "/var/run/docker.sock",
+          "rules": [
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/version"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1\\.[0-9]+/containers/json"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1\\.[0-9]+/containers/[a-f0-9]{12,64}/json"
+            },
+            {
+              "methods": [
+                "POST"
+              ],
+              "path": "/v1\\.[0-9]+/containers/[a-f0-9]{12,64}/(start|stop|restart)"
+            },
+            {
+              "methods": [
+                "GET"
+              ],
+              "path": "/v1\\.[0-9]+/containers/[a-f0-9]{12,64}/logs"
+            }
+          ]
+        }
+      ],
+      "sockets": [
+        "/run/ervisio-todo/api.sock",
+        "/var/run/docker.sock"
+      ]
+    },
+    "contributes": {
+      "pages": [
+        {
+          "id": "todo",
+          "title": "ErvisioTodo",
+          "icon": "list"
+        }
+      ],
+      "widgets": [
+        {
+          "id": "usage",
+          "title": "ErvisioTodo",
+          "icon": "list"
+        }
+      ]
+    },
+    "visibleTo": {
+      "groups": [
+        "wheel",
+        "sudo",
+        "docker"
+      ]
+    },
+    "minCore": "0.6.1",
+    "platforms": [
+      "linux"
+    ]
+  }
+}

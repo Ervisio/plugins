@@ -129,6 +129,12 @@
       "repo": "Ervisio/ErvisioRepo",
       "category": "Web servers",
       "trust": "team"
+    },
+    {
+      "id": "todo",
+      "repo": "Ervisio/ErvisioTodo",
+      "category": "Web servers",
+      "trust": "team"
     }
   ]
 }
