@@ -123,6 +123,12 @@
       "repo": "Ervisio/ErvisioLogs",
       "category": "Monitoring",
       "trust": "team"
+    },
+    {
+      "id": "repo",
+      "repo": "Ervisio/ErvisioRepo",
+      "category": "Web servers",
+      "trust": "team"
     }
   ]
 }
