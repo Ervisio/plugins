@@ -1,11 +1,11 @@
 {
   "id": "repo",
   "repo": "Ervisio/ErvisioRepo",
-  "version": "1.0.2",
-  "tag": "v1.0.2",
-  "asset": "repo-1.0.2.tar.gz",
-  "upstreamSha256": "52dcf8d5623614580ea83d866bba81c99c6a84b105f325951dc915283f46a60e",
-  "notes": "The Docker image build copies `web/.npmrc`, so `npm ci` in the web stage keeps `legacy-peer-deps` and no longer fails on the `openapi-typescript` peer range. v1.0.1 was tagged but never published because of this. Docker image: `ghcr.io/ervisio/ervisio-repo:1.0.2` (linux/amd64, linux/arm64). `SHA256SUMS.sig` is an ed25519 signature checked by `install.sh`. This release also includes everything listed under 1.0.1 in the changelog.",
+  "version": "1.0.3",
+  "tag": "v1.0.3",
+  "asset": "repo-1.0.3.tar.gz",
+  "upstreamSha256": "6694fef4565ab588622d42f33b985d6750bdf6fbc9daa840f8bb9a9f6296b7a5",
+  "notes": "The server no longer exits at startup when Actions is enabled and no `actions` storage policy exists: the actions cache and artifacts are disabled with a warning. The generated and packaged configs now include `[storage.policy.actions]`. `setup.sh` and `setup.bat` build the app image from the checkout when the published image cannot be pulled, instead of starting whatever image is already tagged locally. Docker image: `ghcr.io/ervisio/ervisio-repo:1.0.3` (linux/amd64, linux/arm64). `SHA256SUM...",
   "manifest": {
     "name": "ErvisioRepo",
     "author": "Riccardo Reccia",
