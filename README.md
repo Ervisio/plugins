@@ -12,6 +12,14 @@ and publishes the signed catalog that every console reads in **Plugins › Brows
 
 Plugin authors: see [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Native ErvisiOS pages
+
+Ervisio 0.7.0 and SDK 0.4.0 add optional native desktop pages. A plugin declaring
+`contributes.pages[].ervisios` must set `minCore` to `0.7.0` or newer; older consoles
+reject that manifest field. Keep the public page and register its alternate native
+view in the same plugin. Plugins without native pages continue opening their
+existing page inside a desktop window. See the [SDK tutorial](https://github.com/Ervisio/plugin-sdk/blob/v0.4.0/docs/ervisios.md).
+
 ## Trust model
 
 * Only maintainers merge into `main`. Every plugin listed in `registry.json` is reviewed by a maintainer, and so is
