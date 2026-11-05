@@ -1,11 +1,11 @@
 {
   "id": "ai",
   "repo": "Ervisio/plugin-ai",
-  "version": "0.1.2",
-  "tag": "v0.1.2",
-  "asset": "ai-0.1.2.tar.gz",
-  "upstreamSha256": "420390c76e65b830e87d01e1fbb1d68d772c8c13844d757b563e2608c74f4abe",
-  "notes": "Add the Full access toggle below the chat input: run tools as root without chat confirmations, including calls already waiting for approval. Keep Ervisio administrator authentication and server policy. Credit Ervisio team and fix the Markdown filename collision on Windows.",
+  "version": "0.2.0",
+  "tag": "v0.2.0",
+  "asset": "ai-0.2.0.tar.gz",
+  "upstreamSha256": "0742526bf779c09131df6164958122848c5d4cec182853820a8608b502eb0810",
+  "notes": "Add the native ErvisiOS assistant while preserving the Classic page and existing provider support. Save and restore conversations in each signed-in user's private server account, including complete replies and tool exchanges. Run supported local app and appearance commands immediately through Ervisio's authenticated shell broker, without an API key. Suspend background plugin polling and animations when the window is minimized. Require Ervisio 0.7.0 or newer and build with plugin SDK 0.4.0.",
   "manifest": {
     "name": "AI",
     "author": "Ervisio team",
@@ -138,7 +138,10 @@
         {
           "icon": "zap",
           "id": "ai",
-          "title": "AI"
+          "title": "AI",
+          "ervisios": {
+            "view": "ai-ervisios"
+          }
         }
       ],
       "snippets": [
@@ -167,6 +170,6 @@
         "admin"
       ]
     },
-    "minCore": "0.5.0"
+    "minCore": "0.7.0"
   }
 }
