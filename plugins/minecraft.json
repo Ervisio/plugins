@@ -1,11 +1,11 @@
 {
   "id": "minecraft",
   "repo": "Ervisio/plugin-minecraft",
-  "version": "0.1.1",
-  "tag": "v0.1.1",
-  "asset": "minecraft-0.1.1.tar.gz",
-  "upstreamSha256": "013a96c8b9ad8377a47ee9e60aa4a2301186d1b5dc90161ef3d6adf9af5043f1",
-  "notes": "The logo is now the Minecraft grass block, the game's own icon (vector version from Wikimedia Commons, public domain; Minecraft is a trademark of Mojang).",
+  "version": "0.2.0",
+  "tag": "v0.2.0",
+  "asset": "minecraft-0.2.0.tar.gz",
+  "upstreamSha256": "e27ffe2d1308a7e83ce8439a916f6d96dc861796519942b164a26820b82dbc80",
+  "notes": "Add a native ErvisiOS workspace with persistent server navigation, an inline console and direct Files, Software, Add-ons, Players, Worlds, Backups and Schedules views. Preserve the Classic page, existing runtime jobs, power controls and error handling. Require Ervisio 0.7.0 or later and build with plugin SDK 0.4.0 (contract 4). No additional server permissions.",
   "manifest": {
     "name": "Minecraft",
     "author": "Ervisio team",
@@ -83,7 +83,10 @@
         {
           "id": "minecraft",
           "title": "Minecraft",
-          "icon": "server"
+          "icon": "server",
+          "ervisios": {
+            "view": "minecraft-desktop"
+          }
         }
       ],
       "widgets": [
@@ -101,6 +104,7 @@
         "sudo",
         "admin"
       ]
-    }
+    },
+    "minCore": "0.7.0"
   }
 }
