@@ -1,11 +1,11 @@
 {
   "id": "caddy",
   "repo": "Ervisio/plugin-caddy",
-  "version": "1.0.1",
-  "tag": "v1.0.1",
-  "asset": "caddy-1.0.1.tar.gz",
-  "upstreamSha256": "c71aaa3f380eafaecb77f6a163f238294be857dc578ccfd6dcdbb28c21742d19",
-  "notes": "The plugin has a logo: the Caddy logo is shown instead of the generic icon in the rail, Plugins and Browse (consoles newer than 0.4.0; older ones keep the icon).",
+  "version": "1.1.0",
+  "tag": "v1.1.0",
+  "asset": "caddy-1.1.0.tar.gz",
+  "upstreamSha256": "ef75238458e71a8faae2cc00e9e7af30653a6ffd2f27fb30a76884daf4415fa9",
+  "notes": "Add a native ErvisiOS workspace with persistent Caddy instance navigation, direct Sites, Caddyfile, Certificates and Logs views, and the active configuration in the status bar. Preserve the Classic interface and the existing site editing, validation, reload and configuration history actions. Require Ervisio 0.7.0 or later and build with plugin SDK 0.4.0 (contract 4). No additional server permissions.",
   "manifest": {
     "name": "Caddy",
     "author": "Ervisio team",
@@ -383,7 +383,10 @@
         {
           "icon": "globe",
           "id": "caddy",
-          "title": "Caddy"
+          "title": "Caddy",
+          "ervisios": {
+            "view": "caddy-desktop"
+          }
         }
       ],
       "snippets": [
@@ -410,6 +413,7 @@
         "sudo",
         "docker"
       ]
-    }
+    },
+    "minCore": "0.7.0"
   }
 }
