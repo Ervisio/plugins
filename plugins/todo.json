@@ -1,11 +1,11 @@
 {
   "id": "todo",
   "repo": "Ervisio/ErvisioTodo",
-  "version": "0.3.0",
-  "tag": "v0.3.0",
-  "asset": "todo-0.3.0.tar.gz",
-  "upstreamSha256": "7939a08a8a4daa4615a3eff43ae95258a36bd10d29c5104f9927b54d4db26356",
-  "notes": "First version: install ErvisioTodo with Docker, start, stop, restart, live logs, updates, workspace settings, test email and a usage widget.",
+  "version": "0.3.1",
+  "tag": "v0.3.1",
+  "asset": "todo-0.3.1.tar.gz",
+  "upstreamSha256": "bca5f0534fc171b8737ac6307ed3aa9e3c9df503bd38416255445f747647b391",
+  "notes": "Fix mutually exclusive Overview and Favorites selection. Let new lists inherit the selected theme background, with an option to reset existing lists. Replace native list and project color pickers with the shared picker, preset swatches and HEX input. Keep the settings save bar visible while scrolling, with unsaved status and discard controls.",
   "manifest": {
     "name": "ErvisioTodo",
     "author": "Riccardo Reccia",
