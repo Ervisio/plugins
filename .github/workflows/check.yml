@@ -14,7 +14,6 @@ on:
 
 permissions:
   contents: read
-  statuses: write
 
 concurrency:
   group: check-${{ github.ref }}
@@ -36,8 +35,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           BASE: ${{ github.event.pull_request.base.sha || inputs.base }}
         run: ./scripts/check.sh
-      - name: Report validated commit status
-        if: success()
+
+  report-status:
+    name: Report validated commit status
+    needs: check
+    if: success()
+    runs-on: ubuntu-24.04
+    permissions:
+      statuses: write
+    steps:
+      # No checkout: validation code never receives the status-write token.
+      - name: Report the successful validation on this exact commit
         env:
           GH_TOKEN: ${{ github.token }}
           STATUS_CONTEXT: 'check'

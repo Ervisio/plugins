@@ -5,7 +5,6 @@ on:
 
 permissions:
   contents: read
-  statuses: write
 
 jobs:
   regtool:
@@ -35,8 +34,17 @@ jobs:
       - name: registry.json and plugins/*.json
         working-directory: .
         run: (cd tools/regtool && go run . check -root ../..)
-      - name: Report validated commit status
-        if: success()
+
+  report-status:
+    name: Report validated commit status
+    needs: regtool
+    if: success()
+    runs-on: ubuntu-24.04
+    permissions:
+      statuses: write
+    steps:
+      # No checkout: validation code never receives the status-write token.
+      - name: Report the successful validation on this exact commit
         env:
           GH_TOKEN: ${{ github.token }}
           STATUS_CONTEXT: 'regtool (gofmt, go vet, go test)'
