@@ -1,7 +1,7 @@
 # Pull request check: registry.json and plugins/*.json are valid, and every
 # changed plugins/<id>.json describes exactly the package it points to
 # (checksum, manifest validated with the core's rules, reviewed permissions).
-# Runs without secrets and with a read-only token.
+# Does not write repository contents; reports a status only after validation succeeds.
 name: Check
 
 on:
@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  statuses: write
 
 concurrency:
   group: check-${{ github.ref }}
@@ -35,4 +36,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           BASE: ${{ github.event.pull_request.base.sha || inputs.base }}
         run: ./scripts/check.sh
-
+      - name: Report validated commit status
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STATUS_CONTEXT: 'check'
+        run: |
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state=success -f "context=$STATUS_CONTEXT" \
+            -f "target_url=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            -f description="Validation passed on this exact commit"

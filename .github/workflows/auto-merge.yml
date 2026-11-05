@@ -5,6 +5,8 @@ on:
     types: [completed]
 permissions:
   contents: write
+  checks: read
+  statuses: write
   pull-requests: write
   actions: write
 concurrency:
