@@ -1,11 +1,11 @@
 {
   "id": "docker",
   "repo": "Ervisio/plugin-docker",
-  "version": "2.2.1",
-  "tag": "v2.2.1",
-  "asset": "docker-2.2.1.tar.gz",
-  "upstreamSha256": "b425e8e10d9179f4fcf420a4ba2a5ac0d560acf7f45477a0e590a3826f99fc5d",
-  "notes": "Fix Node 24 test discovery for plugin releases fix Run CI manually instead of on every push and pull request Add one-command plugin release and marketplace registration (#2) README: one-button releases One-button releases with the SDK's release workflow",
+  "version": "2.3.0",
+  "tag": "v2.3.0",
+  "asset": "docker-2.3.0.tar.gz",
+  "upstreamSha256": "6df027e61e35f923952fdf36935198e45f9e687c76aecf475ccc2c8c7109c35f",
+  "notes": "Add a native ErvisiOS Docker workspace with resource navigation, live summaries and quick access to containers, stacks, images, volumes and networks. Preserve the Classic interface and all existing Docker operations, terminals, logs, file tools and environment support. Suspend background plugin polling and animations when the window is minimized. Require Ervisio 0.7.0 or newer and build with plugin SDK 0.4.0.",
   "manifest": {
     "name": "Docker",
     "author": "Ervisio team",
@@ -2466,6 +2466,9 @@
         {
           "icon": "server",
           "id": "docker",
+          "ervisios": {
+            "view": "docker-ervisios"
+          },
           "title": "Docker"
         }
       ],
@@ -2490,6 +2493,6 @@
         "sudo"
       ]
     },
-    "minCore": "0.5.0"
+    "minCore": "0.7.0"
   }
 }
