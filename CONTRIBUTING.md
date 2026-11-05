@@ -24,6 +24,20 @@ team key, which is what lets every console install them. This page says what a p
   source and the build are in the repository; obfuscated code, binaries without source, or code downloaded at run
   time are not accepted.
 
+## Optional ErvisiOS layout
+
+On the ErvisiOS-capable core, every authorized plugin page is also an application. Existing pages open unchanged in a window. A plugin can keep that classic page and opt in to a separate desktop layout:
+
+```json
+{"id":"containers","title":"Containers","ervisios":{"view":"containers-desktop"}}
+```
+
+Declare this object in `contributes.pages` and register both the public `containers` page and the alternate `containers-desktop` view with `sdk.registerPage`. The public page ID, route, capabilities and sandbox remain the same; the alternate view is selected only inside ErvisiOS. Desktop folders organize shortcuts and never create host directories.
+
+Use `sdk.shell?.mode` and the runtime's `[data-shell="ervisios"]` attribute for surface-specific behavior. Share the existing data and command handlers so both layouts retain the full feature set. Follow the [SDK tutorial](https://github.com/Ervisio/plugin-sdk/blob/feat/ervisios/docs/ervisios.md) and [core contract](https://github.com/Ervisio/ervisio/blob/feat/ervisios/docs/dev/ervisios-plugins.md), including loading/error states, responsive sizing and keyboard focus.
+
+The new manifest metadata requires an ErvisiOS-capable core: older released cores reject unknown fields. Keep a legacy manifest for older releases until the core version supporting this contract is released and `CORE_REF` can be advanced. Native view metadata is reviewed and signed with the rest of the manifest; do not change it in an already published package.
+
 ## Proposing a plugin
 
 Open a pull request here that adds one entry to `registry.json`:
