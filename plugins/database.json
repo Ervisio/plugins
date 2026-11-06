@@ -1,11 +1,11 @@
 {
   "id": "database",
   "repo": "Ervisio/plugin-database",
-  "version": "1.4.1",
-  "tag": "v1.4.1",
-  "asset": "database-1.4.1.tar.gz",
-  "upstreamSha256": "82bcb1a5e9755b0c0e2311d0de64f63b842af99b27c9d63845fac6b4e13a17ad",
-  "notes": "Database 1.4 adds a private connection library with virtual folders, persistent server connections and explicitly opened SQLite files. Passwords are remembered only when requested. SQLite discovery checks file contents, uses stable full-path IDs, supports custom scan folders and reports unreadable sources or scan limits. Opening a missing SQLite file never creates a replacement. Creation is separate; SQLite3 filenames, quoted names, generated columns and index metadata are supported. Native s...",
+  "version": "1.4.2",
+  "tag": "v1.4.2",
+  "asset": "database-1.4.2.tar.gz",
+  "upstreamSha256": "cd010cd319c260986f46cef7ad1027ad5d4b9f5c204ec987853a634d9f51bbbd",
+  "notes": "Performance hotfix: remove all automatic SQLite filesystem scans and the eager driver check. Search only one explicitly chosen folder, with a 250 ms / 2,000-entry / 50-result budget and throttled traversal. Existing saved files and folders remain available. Load schema tables only when a database is expanded. Filtering never interrogates collapsed databases. Paginate connection cards and reveal database/table nodes in batches. Remove automatic SQLite table/view row counts, per-database size c...",
   "manifest": {
     "name": "Databases",
     "author": "Ervisio Community",
