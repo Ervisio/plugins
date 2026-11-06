@@ -1,11 +1,11 @@
 {
   "id": "minecraft",
   "repo": "Ervisio/plugin-minecraft",
-  "version": "0.2.0",
-  "tag": "v0.2.0",
-  "asset": "minecraft-0.2.0.tar.gz",
-  "upstreamSha256": "e27ffe2d1308a7e83ce8439a916f6d96dc861796519942b164a26820b82dbc80",
-  "notes": "Add a native ErvisiOS workspace with persistent server navigation, an inline console and direct Files, Software, Add-ons, Players, Worlds, Backups and Schedules views. Preserve the Classic page, existing runtime jobs, power controls and error handling. Require Ervisio 0.7.0 or later and build with plugin SDK 0.4.0 (contract 4). No additional server permissions.",
+  "version": "0.2.1",
+  "tag": "v0.2.1",
+  "asset": "minecraft-0.2.1.tar.gz",
+  "upstreamSha256": "82adfa69f6c7508483f773f1e83a37811146e4082fb0c361c19ae3d543db98a2",
+  "notes": "Use the shared file chooser for the Java executable when creating or editing a server.",
   "manifest": {
     "name": "Minecraft",
     "author": "Ervisio team",
@@ -105,6 +105,6 @@
         "admin"
       ]
     },
-    "minCore": "0.7.0"
+    "minCore": "7.0.4"
   }
 }
