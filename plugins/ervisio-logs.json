@@ -1,15 +1,15 @@
 {
   "id": "ervisio-logs",
   "repo": "Ervisio/ErvisioLogs",
-  "version": "0.1.5",
-  "tag": "v0.1.5",
-  "asset": "ervisio-logs-0.1.5.tar.gz",
-  "upstreamSha256": "251c9eed02c4d58af81056828661065a944eb49dac0aac4be424fe384973efb2",
-  "notes": "Documentation is now available inside the app, in English and Italian. **Documentation** in the main navigation and command palette, available to all signed-in users, including users without a workspace or project. Articles have stable `/docs/<topic>` addresses. Nine searchable guides: getting started, JSON ingest API, search and live logs, tokens and permissions, storage and retention (S3, SFTP / Storage Box and local folders), FiveM, alerts and webhooks, deployment and troubleshooting. Copy...",
+  "version": "0.2.0",
+  "tag": "v0.2.0",
+  "asset": "ervisio-logs-0.2.0.tar.gz",
+  "upstreamSha256": "43571c3ad37cfa3a967ca89fa27e472f18dcf648d924c6aae2f9163902bb4b62",
+  "notes": "Version 0.2.0 adds scoped management, a readable event explorer and operator access from the Ervisio plugin. Workspace and project URLs carry their scope. The rail switches workspace and project; settings separate instance administration, workspace management, project configuration and the account. Light, Dark and AMOLED themes follow the approved blue design. Runtime settings show inherited values and environment locks. Manage users, passwords, sessions, invitations, stream/environment metad...",
   "manifest": {
     "name": "Ervisio Logs",
     "author": "Ervisio team",
-    "description": "Install and run Ervisio Logs on this server, as a Docker Compose stack (shown in the Docker plugin) or as a systemd service, and publish it through the Caddy you already run. Data is never deleted by the plugin.",
+    "description": "Deploy and manage Ervisio Logs with Docker Compose or systemd: instance settings, workspaces, projects, users and archive storage. Connect through the local admin socket or HTTPS, and publish the web app through Caddy.",
     "homepage": "https://github.com/Ervisio/ErvisioLogs",
     "icon": "server",
     "color": "log",
@@ -545,11 +545,61 @@
               "path": "/v1\\.[0-9]+/networks/ervisiologs_edge/connect"
             }
           ]
+        },
+        {
+          "name": "logs-admin-docker",
+          "socket": "/var/lib/docker/volumes/ervisiologs_admin/_data/admin.sock",
+          "admin": true,
+          "headers": [
+            "Content-Type"
+          ],
+          "maxBody": 1048576,
+          "timeoutSec": 30,
+          "rules": [
+            {
+              "methods": [
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE"
+              ],
+              "path": "/api/v1/(admin/(health|settings(/[a-z0-9._-]+)?|users(/[a-f0-9-]+)?(/password|/sessions(/[a-f0-9-]+)?)?|storage(/providers(/[a-f0-9-]+)?(/test)?|/active|/secrets(/[A-Za-z0-9._-]+)?)?|retention(/[a-z]+/[a-f0-9-]+)?|audit)|workspaces(/[a-f0-9-]+)?(/(members(/[a-f0-9-]+)?|invitations(/[a-f0-9-]+)?|settings(/[a-z0-9._-]+)?|audit))?|projects(/[a-f0-9-]+)?(/(environments|streams)(/[a-f0-9-]+)?|/settings(/[a-z0-9._-]+)?)?|tokens(/[a-f0-9-]+)?)"
+            }
+          ]
+        },
+        {
+          "name": "logs-admin-standalone",
+          "socket": "/run/ervisio-logs/admin.sock",
+          "admin": true,
+          "headers": [
+            "Content-Type"
+          ],
+          "maxBody": 1048576,
+          "timeoutSec": 30,
+          "rules": [
+            {
+              "methods": [
+                "GET",
+                "POST",
+                "PUT",
+                "PATCH",
+                "DELETE"
+              ],
+              "path": "/api/v1/(admin/(health|settings(/[a-z0-9._-]+)?|users(/[a-f0-9-]+)?(/password|/sessions(/[a-f0-9-]+)?)?|storage(/providers(/[a-f0-9-]+)?(/test)?|/active|/secrets(/[A-Za-z0-9._-]+)?)?|retention(/[a-z]+/[a-f0-9-]+)?|audit)|workspaces(/[a-f0-9-]+)?(/(members(/[a-f0-9-]+)?|invitations(/[a-f0-9-]+)?|settings(/[a-z0-9._-]+)?|audit))?|projects(/[a-f0-9-]+)?(/(environments|streams)(/[a-f0-9-]+)?|/settings(/[a-z0-9._-]+)?)?|tokens(/[a-f0-9-]+)?)"
+            }
+          ]
         }
       ],
       "sockets": [
-        "/var/run/docker.sock"
-      ]
+        "/var/run/docker.sock",
+        "/var/lib/docker/volumes/ervisiologs_admin/_data/admin.sock",
+        "/run/ervisio-logs/admin.sock"
+      ],
+      "network": {
+        "hosts": [],
+        "userHosts": true
+      }
     },
     "contributes": {
       "pages": [
