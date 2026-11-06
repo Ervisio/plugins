@@ -1,11 +1,11 @@
 {
   "id": "database",
   "repo": "Ervisio/plugin-database",
-  "version": "1.2.2",
-  "tag": "v1.2.2",
-  "asset": "database-1.2.2.tar.gz",
-  "upstreamSha256": "ba55fb266b654cbfa14a67cd401378d49b2f8baa4ef00556dfc4bad37f2729b7",
-  "notes": "update",
+  "version": "1.2.3",
+  "tag": "v1.2.3",
+  "asset": "database-1.2.3.tar.gz",
+  "upstreamSha256": "b5b31eed34d69f90c98353b2068b13cf9b78b2993d03cdf6ab0de4bbb8fae002",
+  "notes": "Fix missing PostgreSQL, MySQL, MongoDB and Redis driver errors with an explicit Prepare drivers action and actionable connection errors. Install SHA-256 pinned binary wheels into an account-local Python runtime, verify imports before/after activation, and preserve previous drivers on failure. System Python and databases are unchanged; SQLite needs no extra drivers. Protect runtime code with account ownership/permissions, Windows token-derived profiles and DACL/reparse checks; never share a us...",
   "manifest": {
     "name": "Databases",
     "author": "Ervisio Community",
@@ -20,7 +20,7 @@
           "description": "Ervisio Database Engine Bridge",
           "admin": true,
           "adminUnlessGroup": "docker",
-          "timeoutSec": 120,
+          "timeoutSec": 300,
           "argv": [
             "python3",
             "/var/lib/ervisio/plugins/database/db-bridge.py",
@@ -47,7 +47,7 @@
           "description": "Ervisio Database Engine Bridge",
           "admin": true,
           "adminUnlessGroup": "docker-users",
-          "timeoutSec": 120,
+          "timeoutSec": 300,
           "argv": [
             "python.exe",
             "C:\\ProgramData\\Ervisio\\data\\plugins\\database\\db-bridge.py",
