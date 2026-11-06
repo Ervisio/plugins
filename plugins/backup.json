@@ -1,15 +1,15 @@
 {
   "id": "backup",
   "repo": "Ervisio/plugin-backup",
-  "version": "0.1.0",
-  "tag": "v0.1.0",
-  "asset": "backup-0.1.0.tar.gz",
-  "upstreamSha256": "77c19123c195cb09c80ba1632dbf138aa35589c72fe91ee3b6523e51ee3f59df",
-  "notes": "Initial Classic and ErvisiOS backup manager for folders, PostgreSQL, MySQL/MariaDB and SQLite snapshots to saved SFTP/SMB connections. Persistent schedules, manual background runs, exclusions, bounded private spooling and authenticated retention/recovery.",
+  "version": "0.2.0",
+  "tag": "v0.2.0",
+  "asset": "backup-0.2.0.tar.gz",
+  "upstreamSha256": "fd5e7295a9babd712ae04e198149b6daef6252263c4af5eeea37c94e5dc4985f",
+  "notes": "Add local folders, HTTP services, ErvisioDrive, ErvisioRepo and S3 destinations; shared source/destination pickers, protected credentials, optional ErvisioLogs events and explicitly scoped retention.",
   "manifest": {
     "name": "Backup",
     "author": "Ervisio team",
-    "description": "Scheduled, account-owned folder and PostgreSQL/MySQL/SQLite backups to saved SFTP or SMB network folders, with provenance-verified retention and background job history. Linux only.",
+    "description": "Scheduled, account-owned folder and PostgreSQL/MySQL/SQLite backups to local folders, SFTP/SMB, HTTP, ErvisioDrive, ErvisioRepo and S3, with provenance-verified retention and background job history. Linux only.",
     "homepage": "https://github.com/Ervisio/plugin-backup",
     "icon": "archive",
     "color": "file",
@@ -267,7 +267,7 @@
       ]
     },
     "visibleTo": {},
-    "minCore": "7.0.3",
+    "minCore": "7.0.4",
     "platforms": [
       "linux"
     ]
