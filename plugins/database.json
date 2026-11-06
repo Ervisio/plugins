@@ -1,11 +1,11 @@
 {
   "id": "database",
   "repo": "Ervisio/plugin-database",
-  "version": "1.2.4",
-  "tag": "v1.2.4",
-  "asset": "database-1.2.4.tar.gz",
-  "upstreamSha256": "4565d361bd586fce7dfbda5b6d4edf348025ef4110415782ec553a2a0c86801a",
-  "notes": "Run database actions in the verified account-owned virtual environment instead of injecting private drivers into system Python. Old optional system OpenSSL/service_identity packages no longer conflict with the private MongoDB/cryptography drivers. Re-execute before consuming private payload files, using an isolated interpreter and only the signed plugin directory. System packages, databases and account credentials are unchanged. Verify imports using the activated runtime interpreter. Add a re...",
+  "version": "1.2.5",
+  "tag": "v1.2.5",
+  "asset": "database-1.2.5.tar.gz",
+  "upstreamSha256": "9af4b1f335f537ca2651972e66d6df11d984b2875398ca9fc1e4fc4d9f6722af",
+  "notes": "Prepare the private POSIX driver runtime with umask 0077, including venv metadata, pip output and the readiness marker. Tighten copied template modes in the fresh stage without following symlinks; preserve owner executable permissions. Restore the caller's umask on success and failure; keep ownership and writable-directory checks strict. Repair previously prepared runtimes through the existing Prepare drivers action. A real Linux regression runs with SSH-style umask 0002, verifies private per...",
   "manifest": {
     "name": "Databases",
     "author": "Ervisio Community",
