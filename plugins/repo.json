@@ -1,11 +1,11 @@
 {
   "id": "repo",
   "repo": "Ervisio/ErvisioRepo",
-  "version": "1.0.5",
-  "tag": "v1.0.5",
-  "asset": "repo-1.0.5.tar.gz",
-  "upstreamSha256": "86e5f211dc05401e58925204a05c8dee4ab2312904ee5cce515a0d0523ff95fc",
-  "notes": "Plugin: the page failed to load with \"React is not ready\" because the settings context was created at import time, before `activate()` set React. Docker image: `ghcr.io/ervisio/ervisio-repo:1.0.5` (linux/amd64, linux/arm64). `SHA256SUMS.sig` is an ed25519 signature checked by `install.sh`.",
+  "version": "1.2.0",
+  "tag": "v1.2.0",
+  "asset": "repo-1.2.0.tar.gz",
+  "upstreamSha256": "59ebfcdf4d5d27a4e46a4c917f606a1e3b0ccf369dd1370bfae7ee8132186323",
+  "notes": "Web: the Console layout has a new acrylic look. A rail of rounded tiles (home, you and your organizations, New, Explore; notifications, Administration, account) sits next to a 248 px channel column that follows the context: global navigation with pinned and recent repositories, repository sections grouped as Code, Collaboration, Automation and Manage, organization tabs or the administration pages, with the account card at the bottom. The page sits on a glass panel over slowly moving accent sh...",
   "manifest": {
     "name": "ErvisioRepo",
     "author": "Riccardo Reccia",
