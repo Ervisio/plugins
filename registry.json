@@ -135,6 +135,12 @@
       "repo": "Ervisio/ErvisioTodo",
       "category": "Web servers",
       "trust": "team"
+    },
+    {
+      "id": "backup",
+      "repo": "Ervisio/plugin-backup",
+      "category": "Storage",
+      "trust": "team"
     }
   ]
 }
