@@ -1,11 +1,11 @@
 {
   "id": "database",
   "repo": "Ervisio/plugin-database",
-  "version": "1.2.3",
-  "tag": "v1.2.3",
-  "asset": "database-1.2.3.tar.gz",
-  "upstreamSha256": "b5b31eed34d69f90c98353b2068b13cf9b78b2993d03cdf6ab0de4bbb8fae002",
-  "notes": "Fix missing PostgreSQL, MySQL, MongoDB and Redis driver errors with an explicit Prepare drivers action and actionable connection errors. Install SHA-256 pinned binary wheels into an account-local Python runtime, verify imports before/after activation, and preserve previous drivers on failure. System Python and databases are unchanged; SQLite needs no extra drivers. Protect runtime code with account ownership/permissions, Windows token-derived profiles and DACL/reparse checks; never share a us...",
+  "version": "1.2.4",
+  "tag": "v1.2.4",
+  "asset": "database-1.2.4.tar.gz",
+  "upstreamSha256": "4565d361bd586fce7dfbda5b6d4edf348025ef4110415782ec553a2a0c86801a",
+  "notes": "Run database actions in the verified account-owned virtual environment instead of injecting private drivers into system Python. Old optional system OpenSSL/service_identity packages no longer conflict with the private MongoDB/cryptography drivers. Re-execute before consuming private payload files, using an isolated interpreter and only the signed plugin directory. System packages, databases and account credentials are unchanged. Verify imports using the activated runtime interpreter. Add a re...",
   "manifest": {
     "name": "Databases",
     "author": "Ervisio Community",
