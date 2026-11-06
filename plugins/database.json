@@ -1,11 +1,11 @@
 {
   "id": "database",
   "repo": "Ervisio/plugin-database",
-  "version": "1.2.5",
-  "tag": "v1.2.5",
-  "asset": "database-1.2.5.tar.gz",
-  "upstreamSha256": "9af4b1f335f537ca2651972e66d6df11d984b2875398ca9fc1e4fc4d9f6722af",
-  "notes": "Prepare the private POSIX driver runtime with umask 0077, including venv metadata, pip output and the readiness marker. Tighten copied template modes in the fresh stage without following symlinks; preserve owner executable permissions. Restore the caller's umask on success and failure; keep ownership and writable-directory checks strict. Repair previously prepared runtimes through the existing Prepare drivers action. A real Linux regression runs with SSH-style umask 0002, verifies private per...",
+  "version": "1.3.0",
+  "tag": "v1.3.0",
+  "asset": "database-1.3.0.tar.gz",
+  "upstreamSha256": "fdc4f442c7f1b32f860909d50c1c93bab4ca38299b48abdd9ed1235122dcb054",
+  "notes": "Add shared SQLite file selection and export destinations: browser download, local folder, SFTP/SMB, HTTP, ErvisioDrive, ErvisioRepo and S3. Optional account-private destination settings; exports never delete old files. All notable changes to the Ervisio Database Plugin will be documented in this file.",
   "manifest": {
     "name": "Databases",
     "author": "Ervisio Community",
@@ -68,6 +68,52 @@
           "platforms": [
             "windows"
           ]
+        },
+        {
+          "name": "db-export-status",
+          "description": "Account-owned database export status",
+          "argv": [
+            "/usr/bin/ervisiod",
+            "--backup",
+            "status"
+          ],
+          "timeoutSec": 30,
+          "platforms": [
+            "linux"
+          ]
+        },
+        {
+          "name": "db-export-remotes",
+          "description": "Account-owned database export remotes",
+          "argv": [
+            "/usr/bin/ervisiod",
+            "--backup",
+            "remotes"
+          ],
+          "timeoutSec": 30,
+          "platforms": [
+            "linux"
+          ]
+        },
+        {
+          "name": "db-export-deliver",
+          "description": "Account-owned database export deliver",
+          "argv": [
+            "/usr/bin/ervisiod",
+            "--backup",
+            "deliver",
+            "{0}"
+          ],
+          "timeoutSec": 600,
+          "platforms": [
+            "linux"
+          ],
+          "args": [
+            {
+              "pattern": "^[a-f0-9]{32}$",
+              "maxLen": 32
+            }
+          ]
         }
       ],
       "files": {
@@ -75,6 +121,10 @@
           {
             "create": true,
             "path": "~/.config/ervisio/plugins/database"
+          },
+          {
+            "create": true,
+            "path": "~/.config/ervisio/plugins/backup/inbox"
           }
         ]
       }
@@ -102,7 +152,7 @@
         "docker-users"
       ]
     },
-    "minCore": "0.6.2",
+    "minCore": "7.0.4",
     "platforms": [
       "linux",
       "windows"
