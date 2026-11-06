@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"sort"
@@ -54,10 +55,10 @@ type capsDoc struct {
 		Read  []json.RawMessage `json:"read"`
 		Write []json.RawMessage `json:"write"`
 	} `json:"files"`
-	Sockets   []string `json:"sockets"`
-	Network   []string `json:"network"`
-	UserHosts bool     `json:"userHosts"`
-	Notify    bool     `json:"notify"`
+	Sockets   []string    `json:"sockets"`
+	Network   networkCaps `json:"network"`
+	UserHosts bool        `json:"userHosts"`
+	Notify    bool        `json:"notify"`
 	Jobs      []struct {
 		Name  string `json:"name"`
 		Steps []struct {
@@ -74,6 +75,27 @@ type capsDoc struct {
 			Params []string `json:"params"`
 		} `json:"webhook"`
 	} `json:"jobs"`
+}
+
+type networkCaps struct {
+	Hosts     []string `json:"hosts"`
+	UserHosts bool     `json:"userHosts"`
+}
+
+func (n *networkCaps) UnmarshalJSON(data []byte) error {
+	var next networkCaps
+	if bytes.HasPrefix(bytes.TrimSpace(data), []byte("[")) {
+		if err := json.Unmarshal(data, &next.Hosts); err != nil {
+			return err
+		}
+	} else {
+		type object networkCaps
+		if err := json.Unmarshal(data, (*object)(&next)); err != nil {
+			return err
+		}
+	}
+	*n = next
+	return nil
 }
 
 type folder struct {
@@ -193,10 +215,10 @@ func permissions(caps, visible json.RawMessage) ([]permItem, error) {
 		}
 		out = append(out, permItem{Key: "socket:" + s, Text: fmt.Sprintf("Talks to socket `%s` (informational)", s), Risks: risks})
 	}
-	for _, n := range c.Network {
+	for _, n := range c.Network.Hosts {
 		out = append(out, permItem{Key: "network:" + n, Text: fmt.Sprintf("The plugin page may connect to `%s` over https/wss", n), Risks: []string{"network"}})
 	}
-	if c.UserHosts {
+	if c.UserHosts || c.Network.UserHosts {
 		out = append(out, permItem{Key: "network:userHosts", Text: "The plugin may ask an administrator to approve more hosts", Risks: []string{"network"}})
 	}
 	if c.Notify {
