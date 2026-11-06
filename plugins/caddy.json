@@ -1,11 +1,11 @@
 {
   "id": "caddy",
   "repo": "Ervisio/plugin-caddy",
-  "version": "1.1.1",
-  "tag": "v1.1.1",
-  "asset": "caddy-1.1.1.tar.gz",
-  "upstreamSha256": "b0617fd9808c8b37e2b79b34a27b4ee81187ba657df49fad533ac7b653ea0d28",
-  "notes": "Use the shared folder chooser for host document roots. Container roots retain their own filesystem context.",
+  "version": "1.1.2",
+  "tag": "v1.1.2",
+  "asset": "caddy-1.1.2.tar.gz",
+  "upstreamSha256": "5edbb75e674e1d8ad1c6c9ee4830fe33b8326f706ea5176b67949e8e4c8d893e",
+  "notes": "Keep ErvisiOS content inside the Caddy window, with a fixed header/status bar and scrolling confined to the workspace. Fit the Caddyfile editor to resized windows.",
   "manifest": {
     "name": "Caddy",
     "author": "Ervisio team",
