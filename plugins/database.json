@@ -1,11 +1,11 @@
 {
   "id": "database",
   "repo": "Ervisio/plugin-database",
-  "version": "1.4.0",
-  "tag": "v1.4.0",
-  "asset": "database-1.4.0.tar.gz",
-  "upstreamSha256": "10c23439cfd9b91cba8c53ae6406d9021229d348aa65dfe2e01ff7fb0e69ec7b",
-  "notes": "Replace truncated SQLite IDs with stable full-path hashes; validate file headers, never create files while opening, preserve SQLite3 filenames and support quoted identifiers, generated columns and index metadata. Add bounded SQLite discovery with configurable scan folders, visible source errors, multiple native service instances and non-default Linux process listener ports. Add a per-account connection library with persistent virtual folders, saved connections, explicit credential retention,...",
+  "version": "1.4.1",
+  "tag": "v1.4.1",
+  "asset": "database-1.4.1.tar.gz",
+  "upstreamSha256": "82bcb1a5e9755b0c0e2311d0de64f63b842af99b27c9d63845fac6b4e13a17ad",
+  "notes": "Database 1.4 adds a private connection library with virtual folders, persistent server connections and explicitly opened SQLite files. Passwords are remembered only when requested. SQLite discovery checks file contents, uses stable full-path IDs, supports custom scan folders and reports unreadable sources or scan limits. Opening a missing SQLite file never creates a replacement. Creation is separate; SQLite3 filenames, quoted names, generated columns and index metadata are supported. Native s...",
   "manifest": {
     "name": "Databases",
     "author": "Ervisio Community",
