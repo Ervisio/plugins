@@ -1,0 +1,275 @@
+{
+  "id": "backup",
+  "repo": "Ervisio/plugin-backup",
+  "version": "0.1.0",
+  "tag": "v0.1.0",
+  "asset": "backup-0.1.0.tar.gz",
+  "upstreamSha256": "77c19123c195cb09c80ba1632dbf138aa35589c72fe91ee3b6523e51ee3f59df",
+  "notes": "Initial Classic and ErvisiOS backup manager for folders, PostgreSQL, MySQL/MariaDB and SQLite snapshots to saved SFTP/SMB connections. Persistent schedules, manual background runs, exclusions, bounded private spooling and authenticated retention/recovery.",
+  "manifest": {
+    "name": "Backup",
+    "author": "Ervisio team",
+    "description": "Scheduled, account-owned folder and PostgreSQL/MySQL/SQLite backups to saved SFTP or SMB network folders, with provenance-verified retention and background job history. Linux only.",
+    "homepage": "https://github.com/Ervisio/plugin-backup",
+    "icon": "archive",
+    "color": "file",
+    "entry": "index.js",
+    "capabilities": {
+      "commands": [
+        {
+          "name": "backup-status",
+          "description": "Account-owned backup helper: status",
+          "platforms": [
+            "linux"
+          ],
+          "argv": [
+            "/usr/bin/ervisiod",
+            "--backup",
+            "status"
+          ],
+          "timeoutSec": 30
+        },
+        {
+          "name": "backup-list",
+          "description": "Account-owned backup helper: list",
+          "platforms": [
+            "linux"
+          ],
+          "argv": [
+            "/usr/bin/ervisiod",
+            "--backup",
+            "list"
+          ],
+          "timeoutSec": 30
+        },
+        {
+          "name": "backup-remotes",
+          "description": "Account-owned backup helper: remotes",
+          "platforms": [
+            "linux"
+          ],
+          "argv": [
+            "/usr/bin/ervisiod",
+            "--backup",
+            "remotes"
+          ],
+          "timeoutSec": 30
+        },
+        {
+          "name": "backup-save",
+          "description": "Account-owned backup helper: save",
+          "platforms": [
+            "linux"
+          ],
+          "argv": [
+            "/usr/bin/ervisiod",
+            "--backup",
+            "save",
+            "{0}"
+          ],
+          "args": [
+            {
+              "pattern": "[a-f0-9]{32}",
+              "maxLen": 32
+            }
+          ],
+          "timeoutSec": 30
+        },
+        {
+          "name": "backup-delete",
+          "description": "Account-owned backup helper: delete",
+          "platforms": [
+            "linux"
+          ],
+          "argv": [
+            "/usr/bin/ervisiod",
+            "--backup",
+            "delete",
+            "{0}"
+          ],
+          "args": [
+            {
+              "pattern": "[a-f0-9]{32}",
+              "maxLen": 32
+            }
+          ],
+          "timeoutSec": 30
+        },
+        {
+          "name": "backup-history",
+          "description": "Account-owned backup helper: history",
+          "platforms": [
+            "linux"
+          ],
+          "argv": [
+            "/usr/bin/ervisiod",
+            "--backup",
+            "history",
+            "{0}"
+          ],
+          "args": [
+            {
+              "pattern": "[a-f0-9]{32}",
+              "maxLen": 32
+            }
+          ],
+          "timeoutSec": 30
+        },
+        {
+          "name": "backup-test",
+          "description": "Account-owned backup helper: test",
+          "platforms": [
+            "linux"
+          ],
+          "argv": [
+            "/usr/bin/ervisiod",
+            "--backup",
+            "test",
+            "{0}"
+          ],
+          "args": [
+            {
+              "pattern": "[a-f0-9]{32}",
+              "maxLen": 32
+            }
+          ],
+          "timeoutSec": 30
+        },
+        {
+          "name": "backup-browse",
+          "description": "Account-owned backup helper: browse",
+          "platforms": [
+            "linux"
+          ],
+          "argv": [
+            "/usr/bin/ervisiod",
+            "--backup",
+            "browse",
+            "{0}"
+          ],
+          "args": [
+            {
+              "pattern": "[a-f0-9]{32}",
+              "maxLen": 32
+            }
+          ],
+          "timeoutSec": 30
+        },
+        {
+          "name": "backup-run",
+          "description": "Account-owned backup helper: run",
+          "platforms": [
+            "linux"
+          ],
+          "argv": [
+            "/usr/bin/ervisiod",
+            "--backup",
+            "run",
+            "{0}"
+          ],
+          "args": [
+            {
+              "pattern": "[a-f0-9]{32}",
+              "maxLen": 32
+            }
+          ],
+          "timeoutSec": 600
+        },
+        {
+          "name": "backup-tick",
+          "description": "Account-owned backup helper: tick",
+          "platforms": [
+            "linux"
+          ],
+          "argv": [
+            "/usr/bin/ervisiod",
+            "--backup",
+            "tick",
+            "{0}"
+          ],
+          "args": [
+            {
+              "pattern": "[a-f0-9]{32}",
+              "maxLen": 32
+            }
+          ],
+          "timeoutSec": 600
+        }
+      ],
+      "files": {
+        "write": [
+          {
+            "path": "~/.config/ervisio/plugins/backup/inbox",
+            "create": true,
+            "platforms": [
+              "linux"
+            ]
+          }
+        ]
+      },
+      "jobs": [
+        {
+          "name": "backup",
+          "description": "Scheduled backup",
+          "timeoutSec": 21600,
+          "params": [
+            {
+              "name": "backup",
+              "pattern": "[a-f0-9]{32}",
+              "maxLen": 32
+            }
+          ],
+          "steps": [
+            {
+              "id": "archive",
+              "command": "backup-tick",
+              "args": [
+                "{param.backup}"
+              ],
+              "timeoutSec": 21600
+            }
+          ]
+        },
+        {
+          "name": "backup-once",
+          "description": "Manual backup independent of next due date",
+          "timeoutSec": 21600,
+          "params": [
+            {
+              "name": "backup",
+              "pattern": "[a-f0-9]{32}",
+              "maxLen": 32
+            }
+          ],
+          "steps": [
+            {
+              "id": "archive",
+              "command": "backup-run",
+              "args": [
+                "{param.backup}"
+              ],
+              "timeoutSec": 21600
+            }
+          ]
+        }
+      ]
+    },
+    "contributes": {
+      "pages": [
+        {
+          "id": "backup",
+          "title": "Backup",
+          "icon": "archive",
+          "ervisios": {
+            "view": "backup-desktop"
+          }
+        }
+      ]
+    },
+    "visibleTo": {},
+    "minCore": "7.0.3",
+    "platforms": [
+      "linux"
+    ]
+  }
+}
