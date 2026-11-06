@@ -1,11 +1,11 @@
 {
   "id": "ai",
   "repo": "Ervisio/plugin-ai",
-  "version": "0.2.0",
-  "tag": "v0.2.0",
-  "asset": "ai-0.2.0.tar.gz",
-  "upstreamSha256": "0742526bf779c09131df6164958122848c5d4cec182853820a8608b502eb0810",
-  "notes": "Add the native ErvisiOS assistant while preserving the Classic page and existing provider support. Save and restore conversations in each signed-in user's private server account, including complete replies and tool exchanges. Run supported local app and appearance commands immediately through Ervisio's authenticated shell broker, without an API key. Suspend background plugin polling and animations when the window is minimized. Require Ervisio 0.7.0 or newer and build with plugin SDK 0.4.0.",
+  "version": "0.3.0",
+  "tag": "v0.3.0",
+  "asset": "ai-0.3.0.tar.gz",
+  "upstreamSha256": "7241f55a7e6bab66786a6b49d45adffd3a06921c11f5a2976080d4091fbf0bba",
+  "notes": "Persist conversations and settings per account with conflict detection; add the compact global assistant surface and the shared safety-folder chooser. All notable changes to the Ervisio AI plugin will be documented in this file.",
   "manifest": {
     "name": "AI",
     "author": "Ervisio team",
@@ -170,6 +170,6 @@
         "admin"
       ]
     },
-    "minCore": "0.7.0"
+    "minCore": "7.0.4"
   }
 }
