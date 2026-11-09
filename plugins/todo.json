@@ -1,11 +1,11 @@
 {
   "id": "todo",
   "repo": "Ervisio/ErvisioTodo",
-  "version": "0.3.3",
-  "tag": "v0.3.3",
-  "asset": "todo-0.3.3.tar.gz",
-  "upstreamSha256": "222bcff26f2f1de0776d95cea6ddc4ae8931e13d505b12d78be729339b5811e8",
-  "notes": "Fix Docker update and install scripts being altered by systemd environment expansion: execute private script files instead of passing shell source in ExecStart. Preserve the existing AUTH_SECRET during configuration recovery and add regression coverage for the complete systemd command boundary.",
+  "version": "0.4.0",
+  "tag": "v0.4.0",
+  "asset": "todo-0.4.0.tar.gz",
+  "upstreamSha256": "5b0420fdd11a0873158a26acbfc136a8b64aa1c89c45dff60d22df5bf1e1acb1",
+  "notes": "New glass interface: AMOLED dark theme with slow blue and violet background spots, a borderless project rail and one acrylic panel for lists and tasks. Lists column collapsed to icons by default; it opens over the tasks or beside them (setting). \"Today\" and \"Important\" views across all lists, shown only when they contain tasks. Minimal task rows with an inline composer, a single actions menu, edge-aware tooltips and optional extra details. Settings, account, workspace administration and API d...",
   "manifest": {
     "name": "ErvisioTodo",
     "author": "Riccardo Reccia",
