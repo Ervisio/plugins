@@ -1,11 +1,11 @@
 {
   "id": "todo",
   "repo": "Ervisio/ErvisioTodo",
-  "version": "0.4.0",
-  "tag": "v0.4.0",
-  "asset": "todo-0.4.0.tar.gz",
-  "upstreamSha256": "5b0420fdd11a0873158a26acbfc136a8b64aa1c89c45dff60d22df5bf1e1acb1",
-  "notes": "New glass interface: AMOLED dark theme with slow blue and violet background spots, a borderless project rail and one acrylic panel for lists and tasks. Lists column collapsed to icons by default; it opens over the tasks or beside them (setting). \"Today\" and \"Important\" views across all lists, shown only when they contain tasks. Minimal task rows with an inline composer, a single actions menu, edge-aware tooltips and optional extra details. Settings, account, workspace administration and API d...",
+  "version": "0.5.0",
+  "tag": "v0.5.0",
+  "asset": "todo-0.5.0.tar.gz",
+  "upstreamSha256": "ccecc0d7432fc1bb39456bc3085c6c8ba16b051b7c9461167c9529269c1f28b5",
+  "notes": "Essential workspace: the lists column is always open and shows the project name and list names; the collapse toggle and the overlay or push setting are gone. Task rows show the check and the title, plus a short due word only for today or overdue tasks; the star appears when set or on hover. The composer sits right after the last task, and completed tasks expand in place from a single \"N completed\" line. Completing a task offers an undo. The detail panel is editable in place: title, due date w...",
   "manifest": {
     "name": "ErvisioTodo",
     "author": "Riccardo Reccia",
