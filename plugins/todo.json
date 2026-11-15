@@ -1,11 +1,11 @@
 {
   "id": "todo",
   "repo": "Ervisio/ErvisioTodo",
-  "version": "0.5.0",
-  "tag": "v0.5.0",
-  "asset": "todo-0.5.0.tar.gz",
-  "upstreamSha256": "ccecc0d7432fc1bb39456bc3085c6c8ba16b051b7c9461167c9529269c1f28b5",
-  "notes": "Essential workspace: the lists column is always open and shows the project name and list names; the collapse toggle and the overlay or push setting are gone. Task rows show the check and the title, plus a short due word only for today or overdue tasks; the star appears when set or on hover. The composer sits right after the last task, and completed tasks expand in place from a single \"N completed\" line. Completing a task offers an undo. The detail panel is editable in place: title, due date w...",
+  "version": "0.6.0",
+  "tag": "v0.6.0",
+  "asset": "todo-0.6.0.tar.gz",
+  "upstreamSha256": "13d9f3fc2e56dbccac1ca8ec5eb4134bf053bcbde42fad1f051184ce97dcf46f",
+  "notes": "New outline look: pure black canvas with thin lines instead of glass, no gradients, and a rail without background. Light and preset themes follow the same language. The accent colour from Settings drives every highlight, and text on filled accent surfaces now switches between black and white for readable contrast. Header with a time-of-day greeting and a progress ring for the open list; due-date chips on every task (today, tomorrow, weekday, date) and a subtask chip. Lists column with Today a...",
   "manifest": {
     "name": "ErvisioTodo",
     "author": "Riccardo Reccia",
