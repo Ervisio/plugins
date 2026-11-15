@@ -1,11 +1,11 @@
 {
   "id": "repo",
   "repo": "Ervisio/ErvisioRepo",
-  "version": "1.5.0",
-  "tag": "v1.5.0",
-  "asset": "repo-1.5.0.tar.gz",
-  "upstreamSha256": "86e879418f0a45b3cd828b9d7a35ee542216c08688d022b1a95c2e40e5f52a54",
-  "notes": "Web: in the Console layout the repository home has a sidebar on the right with About (description, visibility, default branch, link to the README), Releases (the latest one and a link to the others) and Contributors (avatars and count). The description moves there, and the repository home uses a wider 1216 px column. Below 1000 px the sidebar sits under the README. API: `GET /repos/{owner}/{name}/contributors` lists the authors of a ref by number of commits, over the newest 50,000 commits. It...",
+  "version": "1.6.0",
+  "tag": "v1.6.0",
+  "asset": "repo-1.6.0.tar.gz",
+  "upstreamSha256": "f18e791ad23e80771a00980e863d8c87c4e0bc224b652f66c287a3d62cc21107",
+  "notes": "External storage from the web admin: Admin > Storage can add, edit and delete S3-compatible and SFTP targets and change replicas, cache and (while a policy is empty) the primary of each policy. Credentials are typed in the form, sealed in the database with the master key and never returned by the API (only `hasSecretKey`-style flags). A connection test works on an unsaved form. Changes apply after a restart; targets of `config.toml` stay read-only. New endpoints: `GET /admin/storage/config`,...",
   "manifest": {
     "name": "ErvisioRepo",
     "author": "Riccardo Reccia",
