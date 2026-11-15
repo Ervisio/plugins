@@ -1,11 +1,11 @@
 {
   "id": "repo",
   "repo": "Ervisio/ErvisioRepo",
-  "version": "1.4.0",
-  "tag": "v1.4.0",
-  "asset": "repo-1.4.0.tar.gz",
-  "upstreamSha256": "3e6e40eee80a23a0b228fe1f40283e11eff66302da2ebbf301a0dbf0ca2dd6cb",
-  "notes": "Web: the default theme now uses GitHub colours, light and dark, with visible borders on inputs, cards and menus and tighter corners (6, 8 and 12 px). System, Light and Dark use this palette. The previous palettes stay available under Settings, Appearance as OLED (dark) and Soft (light). Accounts keep the theme they had saved: Light and Dark switch to the new colours, and you pick OLED or Soft to get the old ones back. Web: Home has two columns. Your repositories sit on the left with a filter,...",
+  "version": "1.5.0",
+  "tag": "v1.5.0",
+  "asset": "repo-1.5.0.tar.gz",
+  "upstreamSha256": "86e879418f0a45b3cd828b9d7a35ee542216c08688d022b1a95c2e40e5f52a54",
+  "notes": "Web: in the Console layout the repository home has a sidebar on the right with About (description, visibility, default branch, link to the README), Releases (the latest one and a link to the others) and Contributors (avatars and count). The description moves there, and the repository home uses a wider 1216 px column. Below 1000 px the sidebar sits under the README. API: `GET /repos/{owner}/{name}/contributors` lists the authors of a ref by number of commits, over the newest 50,000 commits. It...",
   "manifest": {
     "name": "ErvisioRepo",
     "author": "Riccardo Reccia",
