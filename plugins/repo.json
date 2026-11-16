@@ -1,11 +1,11 @@
 {
   "id": "repo",
   "repo": "Ervisio/ErvisioRepo",
-  "version": "1.6.0",
-  "tag": "v1.6.0",
-  "asset": "repo-1.6.0.tar.gz",
-  "upstreamSha256": "f18e791ad23e80771a00980e863d8c87c4e0bc224b652f66c287a3d62cc21107",
-  "notes": "External storage from the web admin: Admin > Storage can add, edit and delete S3-compatible and SFTP targets and change replicas, cache and (while a policy is empty) the primary of each policy. Credentials are typed in the form, sealed in the database with the master key and never returned by the API (only `hasSecretKey`-style flags). A connection test works on an unsaved form. Changes apply after a restart; targets of `config.toml` stay read-only. New endpoints: `GET /admin/storage/config`,...",
+  "version": "1.13.1",
+  "tag": "v1.13.1",
+  "asset": "repo-1.13.1.tar.gz",
+  "upstreamSha256": "9eee7ffed140c3c88b1045f3a504c9e3b3fbd5e0bddc1a1282ce8c560d070bd3",
+  "notes": "Runner device registration: the device code was hex while `PollDevice` only accepted the base64 token shape, so the first poll answered \"the server no longer knows this code\" and `install.sh` stopped before the approval. Device codes now use the same shape as the other secret tokens.",
   "manifest": {
     "name": "ErvisioRepo",
     "author": "Riccardo Reccia",
