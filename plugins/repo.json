@@ -1,11 +1,11 @@
 {
   "id": "repo",
   "repo": "Ervisio/ErvisioRepo",
-  "version": "1.14.4",
-  "tag": "v1.14.4",
-  "asset": "repo-1.14.4.tar.gz",
-  "upstreamSha256": "9ece6ddfbe1c14140734115f5c209032be871da31d306c5134208611b0c5964d",
-  "notes": "Release assets, LFS objects and issue attachments: without `[storage.policy.releases]`/`[storage.policy.lfs]` (shipped configs only set `git` and `actions`) uploads answered 503. Both policies now default to the targets of the `git` policy. Releases: users and tokens with write access (including Actions jobs with `permissions: contents: write`) can create and edit releases, as on GitHub; maintain is no longer required.",
+  "version": "1.16.2",
+  "tag": "v1.16.2",
+  "asset": "repo-1.16.2.tar.gz",
+  "upstreamSha256": "aeb5bd423207bbb1843d132b149093cfe547d0b205ae4665d8c74c941daa6dac",
+  "notes": "Hovercards: hovering or focusing any link to a user, an organization or a repository shows a card (avatar, name, bio, place, organizations; organization description; repository image, description, stars, last update). Organization members carry `avatarUrl` (GET /orgs/{org}/members) and the people list shows their avatars. Profile activity is a timeline grouped by month: published releases, opened or merged pull requests and opened issues get a large card, the rest stays one line; \"Show more a...",
   "manifest": {
     "name": "ErvisioRepo",
     "author": "Riccardo Reccia",
