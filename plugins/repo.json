@@ -1,11 +1,11 @@
 {
   "id": "repo",
   "repo": "Ervisio/ErvisioRepo",
-  "version": "1.16.2",
-  "tag": "v1.16.2",
-  "asset": "repo-1.16.2.tar.gz",
-  "upstreamSha256": "aeb5bd423207bbb1843d132b149093cfe547d0b205ae4665d8c74c941daa6dac",
-  "notes": "Hovercards: hovering or focusing any link to a user, an organization or a repository shows a card (avatar, name, bio, place, organizations; organization description; repository image, description, stars, last update). Organization members carry `avatarUrl` (GET /orgs/{org}/members) and the people list shows their avatars. Profile activity is a timeline grouped by month: published releases, opened or merged pull requests and opened issues get a large card, the rest stays one line; \"Show more a...",
+  "version": "1.16.3",
+  "tag": "v1.16.3",
+  "asset": "repo-1.16.3.tar.gz",
+  "upstreamSha256": "e8fdfda76bc4a64d499d42fa7e7b9fcc520d5b0b5334c3d52d37fc1a24b69852",
+  "notes": "Release pages use canonical tag URLs, while existing UUID links remain valid. The Releases heading opens the repository release list. Docker: ghcr.io/ervisio/ervisio-repo:1.16.3.",
   "manifest": {
     "name": "ErvisioRepo",
     "author": "Riccardo Reccia",
