@@ -1,11 +1,11 @@
 {
   "id": "repo",
   "repo": "Ervisio/ErvisioRepo",
-  "version": "1.22.1",
-  "tag": "v1.22.1",
-  "asset": "repo-1.22.1.tar.gz",
-  "upstreamSha256": "22c7eb9081097e7455fb850b3306cd2f5f2d37f7025ec3f8aafc2b2bbc1bc4e4",
-  "notes": "**Collaborator chats need no PC setting.** With ErvisioCode 0.9.5 or later, sharing a full-history chat as Collaborator is enough: collaborators write in the owner's `/code` chat, and the owner's PC agent works on their prompts with the owner's tools and permission prompts. Includes everything from 1.22.0: group chat collaboration with attributed prompts, the agent's live todo list above the composer, and migration 00461. Includes a Linux amd64 binary archive, the ErvisioRepo plugin, and SHA-...",
+  "version": "1.23.1",
+  "tag": "v1.23.1",
+  "asset": "repo-1.23.1.tar.gz",
+  "upstreamSha256": "68e611ecb1764fae172a89d533f8d1377afca4b32ebcb0a78412ec4318c74e48",
+  "notes": "Matched the browser favicon to the original horizontal logo and reduced the top-bar logo slightly without shrinking its click target. The repository Code page keeps its original file layout and opens the shared Todo from a compact progress button. Organization Todo sits below languages. Completed tasks show who checked them, with an avatar when available. Audio, video and image previews now open the actual Git LFS object, when available to the viewer, rather than the pointer. Expanded media f...",
   "manifest": {
     "name": "ErvisioRepo",
     "author": "Riccardo Reccia",
